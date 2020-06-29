@@ -1,21 +1,21 @@
 ﻿#region license
 
 // Copyright (C) 2020 ClassicUO Development Community on Github
-// 
+//
 // This project is an alternative client for the game Ultima Online.
 // The goal of this is to develop a lightweight client considering
 // new technologies.
-// 
+//
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-// 
+//
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-// 
+//
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -46,6 +46,11 @@ namespace ClassicUO
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetDllDirectory(string lpPathName);
+
+        public static void Run(string[] args)
+        {
+            Main(args);
+        }
 
         [STAThread]
         public static void Main(string[] args)
@@ -141,13 +146,12 @@ namespace ClassicUO
             {
                 // settings specified in path does not exists, make new one
                 {
-                    // TODO: 
+                    // TODO:
                     Settings.GlobalSettings.Save();
                 }
             }
 
             Settings.GlobalSettings = ConfigurationResolver.Load<Settings>(globalSettingsPath);
-            CUOEnviroment.IsOutlands = Settings.GlobalSettings.ShardType == 2;
 
             ReadSettingsFromArgs(args);
 
@@ -158,18 +162,21 @@ namespace ClassicUO
                 Settings.GlobalSettings.Save();
             }
 
+            // Override whatever garbage they passed in.
+            if (!Settings.GlobalSettings.IP.Equals("test.uooutlands.com") && !Settings.GlobalSettings.IP.Equals("play.uooutlands.com") && !Settings.GlobalSettings.IP.Equals("127.0.0.1"))
+            {
+                Settings.GlobalSettings.IP = "play.uooutlands.com";
+            }
+            Settings.GlobalSettings.ShardType = 2;
+            Settings.GlobalSettings.ClientVersion = "7.0.15.1";
+            Settings.GlobalSettings.Encryption = 0;
+            CUOEnviroment.IsOutlands = true;
+
             if (!CUOEnviroment.IsUnix)
             {
-                string libsPath = Path.Combine
-                    (CUOEnviroment.ExecutablePath, Environment.Is64BitProcess ? "x64" : "x86");
-
+                string libsPath = Path.Combine(
+                    CUOEnviroment.ExecutablePath, Environment.Is64BitProcess ? "x64" : "x86");
                 SetDllDirectory(libsPath);
-            }
-
-
-            if (string.IsNullOrWhiteSpace(Settings.GlobalSettings.UltimaOnlineDirectory))
-            {
-                Settings.GlobalSettings.UltimaOnlineDirectory = CUOEnviroment.ExecutablePath;
             }
 
             const uint INVALID_UO_DIRECTORY = 0x100;
@@ -180,7 +187,12 @@ namespace ClassicUO
             if (!Directory.Exists(Settings.GlobalSettings.UltimaOnlineDirectory) ||
                 !File.Exists(UOFileManager.GetUOFilePath("tiledata.mul")))
             {
-                flags |= INVALID_UO_DIRECTORY;
+                // Try to force the path
+                Settings.GlobalSettings.UltimaOnlineDirectory = Path.GetFullPath(Path.Combine(CUOEnviroment.ExecutablePath, @"..\"));
+                if (!Directory.Exists(Settings.GlobalSettings.UltimaOnlineDirectory) || !File.Exists(UOFileManager.GetUOFilePath("tiledata.mul")))
+                {
+                    flags |= INVALID_UO_DIRECTORY;
+                }
             }
 
             string clientVersionText = Settings.GlobalSettings.ClientVersion;
@@ -218,14 +230,6 @@ namespace ClassicUO
                 else if ((flags & INVALID_UO_VERSION) != 0)
                 {
                     Client.ShowErrorMessage(ResGeneral.YourUOClientVersionIsInvalid);
-                }
-
-                try
-                {
-                    Process.Start(ResGeneral.ClassicUOLink);
-                }
-                catch
-                {
                 }
             }
             else
@@ -276,7 +280,7 @@ namespace ClassicUO
 
                 switch (cmd)
                 {
-                    // Here we have it! Using `-settings` option we can now set the filepath that will be used 
+                    // Here we have it! Using `-settings` option we can now set the filepath that will be used
                     // to load and save ClassicUO main settings instead of default `./settings.json`
                     // NOTE: All individual settings like `username`, `password`, etc passed in command-line options
                     // will override and overwrite those in the settings file because they have higher priority
