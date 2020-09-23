@@ -31,6 +31,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.Game.UI.Gumps.Options;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
@@ -232,73 +233,79 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new NiceButton(10, 10 + 30 * i++, 140, 25, ButtonAction.SwitchPage, ResGumps.General)
-                    { IsSelected = true, ButtonParameter = 1 }
+                { IsSelected = true, ButtonParameter = 1 }
             );
 
             Add
             (
                 new NiceButton(10, 10 + 30 * i++, 140, 25, ButtonAction.SwitchPage, ResGumps.Sound)
-                    { ButtonParameter = 2 }
+                { ButtonParameter = 2 }
             );
 
             Add
             (
                 new NiceButton(10, 10 + 30 * i++, 140, 25, ButtonAction.SwitchPage, ResGumps.Video)
-                    { ButtonParameter = 3 }
+                { ButtonParameter = 3 }
             );
 
             Add
             (
                 new NiceButton(10, 10 + 30 * i++, 140, 25, ButtonAction.SwitchPage, ResGumps.Macros)
-                    { ButtonParameter = 4 }
+                { ButtonParameter = 4 }
             );
 
             Add
             (
                 new NiceButton(10, 10 + 30 * i++, 140, 25, ButtonAction.SwitchPage, ResGumps.Tooltip)
-                    { ButtonParameter = 5 }
+                { ButtonParameter = 5 }
             );
 
             Add
             (
                 new NiceButton(10, 10 + 30 * i++, 140, 25, ButtonAction.SwitchPage, ResGumps.Fonts)
-                    { ButtonParameter = 6 }
+                { ButtonParameter = 6 }
             );
 
             Add
             (
                 new NiceButton(10, 10 + 30 * i++, 140, 25, ButtonAction.SwitchPage, ResGumps.Speech)
-                    { ButtonParameter = 7 }
+                { ButtonParameter = 7 }
             );
 
             Add
             (
                 new NiceButton(10, 10 + 30 * i++, 140, 25, ButtonAction.SwitchPage, ResGumps.CombatSpells)
-                    { ButtonParameter = 8 }
+                { ButtonParameter = 8 }
             );
 
             Add
             (
                 new NiceButton(10, 10 + 30 * i++, 140, 25, ButtonAction.SwitchPage, ResGumps.Counters)
-                    { ButtonParameter = 9 }
+                { ButtonParameter = 9 }
             );
 
             Add
             (
                 new NiceButton(10, 10 + 30 * i++, 140, 25, ButtonAction.SwitchPage, ResGumps.InfoBar)
-                    { ButtonParameter = 10 }
+                { ButtonParameter = 10 }
             );
 
             Add
             (
                 new NiceButton(10, 10 + 30 * i++, 140, 25, ButtonAction.SwitchPage, ResGumps.Containers)
-                    { ButtonParameter = 11 }
+                { ButtonParameter = 11 }
             );
 
             Add
             (
                 new NiceButton(10, 10 + 30 * i++, 140, 25, ButtonAction.SwitchPage, ResGumps.Experimental)
-                    { ButtonParameter = 12 }
+                { ButtonParameter = 12 }
+            );
+
+            Add
+            (
+                new NiceButton(10, 10 + 30 * i++, 140, 25, ButtonAction.SwitchPage, ResGumps.ScriptsManager_UI_ScriptsTab)
+                { ButtonParameter = 13 }
             );
 
 
@@ -311,7 +318,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new Button((int) Buttons.Cancel, 0x00F3, 0x00F1, 0x00F2)
+                new Button((int)Buttons.Cancel, 0x00F3, 0x00F1, 0x00F2)
                 {
                     X = 154 + offsetX, Y = 405 + offsetY, ButtonAction = ButtonAction.Activate
                 }
@@ -319,7 +326,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new Button((int) Buttons.Apply, 0x00EF, 0x00F0, 0x00EE)
+                new Button((int)Buttons.Apply, 0x00EF, 0x00F0, 0x00EE)
                 {
                     X = 248 + offsetX, Y = 405 + offsetY, ButtonAction = ButtonAction.Activate
                 }
@@ -327,7 +334,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new Button((int) Buttons.Default, 0x00F6, 0x00F4, 0x00F5)
+                new Button((int)Buttons.Default, 0x00F6, 0x00F4, 0x00F5)
                 {
                     X = 346 + offsetX, Y = 405 + offsetY, ButtonAction = ButtonAction.Activate
                 }
@@ -335,7 +342,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new Button((int) Buttons.Ok, 0x00F9, 0x00F8, 0x00F7)
+                new Button((int)Buttons.Ok, 0x00F9, 0x00F8, 0x00F7)
                 {
                     X = 443 + offsetX, Y = 405 + offsetY, ButtonAction = ButtonAction.Activate
                 }
@@ -357,6 +364,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildInfoBar();
             BuildContainers();
             BuildExperimental();
+            BuildScripts();
 
             ChangePage(1);
         }
@@ -1144,6 +1152,15 @@ namespace ClassicUO.Game.UI.Gumps
             Add(rightArea, PAGE);
         }
 
+        private void BuildScripts()
+        {
+            const int PAGE = 13;
+
+            var scriptPage = new OptionsScriptsPage();
+            scriptPage.Build();
+
+            Add(scriptPage, PAGE);
+        }
 
         private void BuildCommands()
         {
@@ -1155,12 +1172,12 @@ namespace ClassicUO.Game.UI.Gumps
             Add(new Line(191 + 150, 21, 1, 418, Color.Gray.PackedValue), PAGE);
 
             NiceButton addButton = new NiceButton(190, 20, 130, 20, ButtonAction.Activate, ResGumps.NewMacro)
-                { IsSelectable = false, ButtonParameter = (int) Buttons.NewMacro };
+            { IsSelectable = false, ButtonParameter = (int)Buttons.NewMacro };
 
             Add(addButton, PAGE);
 
             NiceButton delButton = new NiceButton(190, 52, 130, 20, ButtonAction.Activate, ResGumps.DeleteMacro)
-                { IsSelectable = false, ButtonParameter = (int) Buttons.DeleteMacro };
+            { IsSelectable = false, ButtonParameter = (int)Buttons.DeleteMacro };
 
             Add(delButton, PAGE);
 
@@ -1197,7 +1214,7 @@ namespace ClassicUO.Game.UI.Gumps
                         (
                             nb = new NiceButton(0, 0, 130, 25, ButtonAction.Activate, name)
                             {
-                                ButtonParameter = (int) Buttons.Last + 1 + rightArea.Children.Count
+                                ButtonParameter = (int)Buttons.Last + 1 + rightArea.Children.Count
                             }
                         );
 
@@ -1315,7 +1332,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             MacroManager macroManager = Client.Game.GetScene<GameScene>().Macros;
 
-            for (Macro macro = (Macro) macroManager.Items; macro != null; macro = (Macro) macro.Next)
+            for (Macro macro = (Macro)macroManager.Items; macro != null; macro = (Macro)macro.Next)
             {
                 NiceButton nb;
 
@@ -1323,7 +1340,7 @@ namespace ClassicUO.Game.UI.Gumps
                 (
                     nb = new NiceButton(0, 0, 130, 25, ButtonAction.Activate, macro.Name)
                     {
-                        ButtonParameter = (int) Buttons.Last + 1 + rightArea.Children.Count,
+                        ButtonParameter = (int)Buttons.Last + 1 + rightArea.Children.Count,
                         Tag = macro
                     }
                 );
@@ -1332,7 +1349,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 nb.DragBegin += (sss, eee) =>
                 {
-                    NiceButton mupNiceButton = (NiceButton) sss;
+                    NiceButton mupNiceButton = (NiceButton)sss;
 
                     Macro m = mupNiceButton.Tag as Macro;
 
@@ -1371,7 +1388,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 nb.MouseUp += (sss, eee) =>
                 {
-                    NiceButton mupNiceButton = (NiceButton) sss;
+                    NiceButton mupNiceButton = (NiceButton)sss;
 
                     Macro m = mupNiceButton.Tag as Macro;
 
@@ -1573,7 +1590,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _randomizeColorsButton = new NiceButton
                 (startX, startY, 140, 25, ButtonAction.Activate, ResGumps.RandomizeSpeechHues)
-                { ButtonParameter = (int) Buttons.Disabled };
+            { ButtonParameter = (int)Buttons.Disabled };
 
             _randomizeColorsButton.MouseUp += (sender, e) =>
             {
@@ -1582,12 +1599,12 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
                 }
 
-                ushort speechHue = (ushort) RandomHelper.GetValue
+                ushort speechHue = (ushort)RandomHelper.GetValue
                     (2, 0x03b2); //this seems to be the acceptable hue range for chat messages,
 
-                ushort emoteHue = (ushort) RandomHelper.GetValue(2, 0x03b2); //taken from POL source code.
-                ushort yellHue = (ushort) RandomHelper.GetValue(2, 0x03b2);
-                ushort whisperHue = (ushort) RandomHelper.GetValue(2, 0x03b2);
+                ushort emoteHue = (ushort)RandomHelper.GetValue(2, 0x03b2); //taken from POL source code.
+                ushort yellHue = (ushort)RandomHelper.GetValue(2, 0x03b2);
+                ushort whisperHue = (ushort)RandomHelper.GetValue(2, 0x03b2);
                 ProfileManager.Current.SpeechHue = speechHue;
                 _speechColorPickerBox.SetColor(speechHue, HuesLoader.Instance.GetPolygoneColor(12, speechHue));
                 ProfileManager.Current.EmoteHue = emoteHue;
@@ -1917,11 +1934,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             NiceButton nb = new NiceButton
                 (startX, startY, 90, 20, ButtonAction.Activate, ResGumps.AddItem, 0, TEXT_ALIGN_TYPE.TS_LEFT)
-                {
-                    ButtonParameter = -1,
-                    IsSelectable = true,
-                    IsSelected = true
-                };
+            {
+                ButtonParameter = -1,
+                IsSelectable = true,
+                IsSelected = true
+            };
 
             nb.MouseUp += (sender, e) =>
             {
@@ -2069,11 +2086,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             NiceButton button = new NiceButton
                 (startX, startY, 130, 30, ButtonAction.Activate, ResGumps.RebuildContainers)
-                {
-                    ButtonParameter = -1,
-                    IsSelectable = true,
-                    IsSelected = true
-                };
+            {
+                ButtonParameter = -1,
+                IsSelectable = true,
+                IsSelected = true
+            };
 
             button.MouseUp += (sender, e) => { ContainerManager.BuildContainerFile(true); };
             rightArea.Add(button);
@@ -2084,13 +2101,13 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
-            if (buttonID == (int) Buttons.Last + 1)
+            if (buttonID == (int)Buttons.Last + 1)
             {
                 // it's the macro buttonssss
                 return;
             }
 
-            switch ((Buttons) buttonID)
+            switch ((Buttons)buttonID)
             {
                 case Buttons.Disabled: break;
 
@@ -2602,7 +2619,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ProfileManager.Current.UseAlternativeLights = _altLights.IsChecked;
             ProfileManager.Current.UseCustomLightLevel = _enableLight.IsChecked;
-            ProfileManager.Current.LightLevel = (byte) (_lightBar.MaxValue - _lightBar.Value);
+            ProfileManager.Current.LightLevel = (byte)(_lightBar.MaxValue - _lightBar.Value);
 
             if (_enableLight.IsChecked)
             {
@@ -2767,7 +2784,7 @@ namespace ClassicUO.Game.UI.Gumps
                         UIManager.Add
                         (
                             new HealthBarGump(customhealthbar.LocalSerial)
-                                { X = customhealthbar.X, Y = customhealthbar.Y }
+                            { X = customhealthbar.X, Y = customhealthbar.Y }
                         );
 
                         customhealthbar.Dispose();
@@ -2831,10 +2848,10 @@ namespace ClassicUO.Game.UI.Gumps
             // containers
             int containerScale = ProfileManager.Current.ContainersScale;
 
-            if ((byte) _containersScale.Value != containerScale || ProfileManager.Current.ScaleItemsInsideContainers !=
+            if ((byte)_containersScale.Value != containerScale || ProfileManager.Current.ScaleItemsInsideContainers !=
                 _containerScaleItems.IsChecked)
             {
-                containerScale = ProfileManager.Current.ContainersScale = (byte) _containersScale.Value;
+                containerScale = ProfileManager.Current.ContainersScale = (byte)_containersScale.Value;
                 UIManager.ContainerScale = containerScale / 100f;
                 ProfileManager.Current.ScaleItemsInsideContainers = _containerScaleItems.IsChecked;
 
