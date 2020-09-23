@@ -33,6 +33,8 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
+using ClassicUO.Game.UI.Gumps.Options;
+using ClassicUO.Interfaces;
 using ClassicUO.Network;
 using ClassicUO.Resources;
 using ClassicUO.Utility;

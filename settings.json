@@ -1,0 +1,36 @@
+{
+	"username" : "SilverBelieve",
+	"password" : "1+1D75267A703871590D0B290E733E2B71",
+	"ip" : "test.uooutlands.com",
+	"port" : 2593,
+	"ultimaonlinedirectory" : "C:\\Program Files (x86)\\Ultima Online Outlands\\",
+	"clientversion" : "7.0.15.1",
+	"lastcharactername" : "Grimwyrd",
+	"cliloc" : "C:\\Program Files (x86)\\Ultima Online Outlands\\Cliloc.enu",
+	"lastservernum" : 1,
+	"fps" : 250,
+	"window_position" : {
+		"X" : 0,
+		"Y" : 0
+	},
+	"window_size" : {
+		"X" : 1920,
+		"Y" : 1017
+	},
+	"is_win_maximized" : true,
+	"saveaccount" : true,
+	"autologin" : false,
+	"reconnect" : false,
+	"reconnect_time" : 0,
+	"login_music" : false,
+	"login_music_volume" : 8,
+	"shard_type" : 2,
+	"fixed_time_step" : true,
+	"run_mouse_in_separate_thread" : true,
+	"force_driver" : 0,
+	"use_verdata" : false,
+	"encryption" : 0
+	// "plugins" : [
+	// 	"../Assistant/Razor.dll"
+	// ]
+}

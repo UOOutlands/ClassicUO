@@ -1445,7 +1445,7 @@ namespace ClassicUO.Network
     {
         public PStunRequest() : base(0xBF)
         {
-            WriteUShort(0x09);
+            WriteUShort(0x0A);
         }
     }
 
@@ -1453,7 +1453,7 @@ namespace ClassicUO.Network
     {
         public PDisarmRequest() : base(0xBF)
         {
-            WriteUShort(0x0A);
+            WriteUShort(0x09);
         }
     }
 
