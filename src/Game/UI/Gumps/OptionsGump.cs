@@ -31,6 +31,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.Game.UI.Gumps.Options;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
@@ -305,6 +306,11 @@ namespace ClassicUO.Game.UI.Gumps
                     { ButtonParameter = 12 }
             );
 
+            Add
+            (
+                new NiceButton(10, 10 + 30 * i++, 140, 25, ButtonAction.SwitchPage, ResGumps.ScriptsManager_UI_ScriptsTab)
+                { ButtonParameter = 13 }
+            );
 
             Add(new Line(160, 5, 1, HEIGHT - 10, Color.Gray.PackedValue));
 
@@ -361,6 +367,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildInfoBar();
             BuildContainers();
             BuildExperimental();
+            BuildScripts();
 
             ChangePage(1);
         }
@@ -1155,6 +1162,15 @@ namespace ClassicUO.Game.UI.Gumps
             Add(rightArea, PAGE);
         }
 
+        private void BuildScripts()
+        {
+            const int PAGE = 13;
+
+            var scriptPage = new OptionsScriptsPage();
+            scriptPage.Build();
+
+            Add(scriptPage, PAGE);
+        }
 
         private void BuildCommands()
         {

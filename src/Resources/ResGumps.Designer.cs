@@ -2874,6 +2874,124 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to That script name is either invalid or already in use..
+        /// </summary>
+        public static string ScriptsManager_Create_InvalidName {
+            get {
+                return ResourceManager.GetString("ScriptsManager_Create_InvalidName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Do you want
+        ///to delete it?.
+        /// </summary>
+        public static string ScriptsManager_UI_DeleteConfirmation {
+            get {
+                return ResourceManager.GetString("ScriptsManager_UI_DeleteConfirmation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete Script.
+        /// </summary>
+        public static string ScriptsManager_UI_DeleteScript {
+            get {
+                return ResourceManager.GetString("ScriptsManager_UI_DeleteScript", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Open.
+        /// </summary>
+        public static string ScriptsManager_UI_ExternalEditor {
+            get {
+                return ResourceManager.GetString("ScriptsManager_UI_ExternalEditor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to New Script.
+        /// </summary>
+        public static string ScriptsManager_UI_NewScript {
+            get {
+                return ResourceManager.GetString("ScriptsManager_UI_NewScript", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Scripts Folder.
+        /// </summary>
+        public static string ScriptsManager_UI_OpenScriptsDirectory {
+            get {
+                return ResourceManager.GetString("ScriptsManager_UI_OpenScriptsDirectory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rename.
+        /// </summary>
+        public static string ScriptsManager_UI_Rename {
+            get {
+                return ResourceManager.GetString("ScriptsManager_UI_Rename", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Restore.
+        /// </summary>
+        public static string ScriptsManager_UI_Restore {
+            get {
+                return ResourceManager.GetString("ScriptsManager_UI_Restore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Run.
+        /// </summary>
+        public static string ScriptsManager_UI_Run {
+            get {
+                return ResourceManager.GetString("ScriptsManager_UI_Run", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Script Name.
+        /// </summary>
+        public static string ScriptsManager_UI_ScriptName {
+            get {
+                return ResourceManager.GetString("ScriptsManager_UI_ScriptName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Scripts.
+        /// </summary>
+        public static string ScriptsManager_UI_ScriptsTab {
+            get {
+                return ResourceManager.GetString("ScriptsManager_UI_ScriptsTab", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Stop.
+        /// </summary>
+        public static string ScriptsManager_UI_Stop {
+            get {
+                return ResourceManager.GetString("ScriptsManager_UI_Stop", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sync.
+        /// </summary>
+        public static string ScriptsManager_UI_Sync {
+            get {
+                return ResourceManager.GetString("ScriptsManager_UI_Sync", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Secondary Ability Icon.
         /// </summary>
         public static string SecondaryAbilityIcon {

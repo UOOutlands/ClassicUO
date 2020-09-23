@@ -107,6 +107,7 @@ namespace ClassicUO.Game.Scenes
         public HotkeysManager Hotkeys { get; private set; }
 
         public MacroManager Macros { get; private set; }
+        public ScriptManager Scripts { get; private set; }
 
         public InfoBarManager InfoBars { get; private set; }
 
@@ -148,6 +149,9 @@ namespace ClassicUO.Game.Scenes
             // #########################################################
 
             Macros.Load();
+
+            Scripts = new ScriptManager();
+            Scripts.Load();
 
             InfoBars = new InfoBarManager();
             InfoBars.Load();
@@ -329,6 +333,7 @@ namespace ClassicUO.Game.Scenes
                 (ProfileManager.ProfilePath, UIManager.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
 
             Macros.Save();
+            Scripts.Save();
             InfoBars.Save();
             ProfileManager.UnLoadProfile();
 
@@ -351,6 +356,7 @@ namespace ClassicUO.Game.Scenes
             _useItemQueue = null;
             Hotkeys = null;
             Macros = null;
+            Scripts = null;
             MessageManager.MessageReceived -= ChatOnMessageReceived;
 
 
@@ -703,6 +709,7 @@ namespace ClassicUO.Game.Scenes
             }
 
             Macros.Update();
+            Scripts.Update();
 
             if ((currentProfile.CorpseOpenOptions == 1 || currentProfile.CorpseOpenOptions == 3) &&
                 TargetManager.IsTargeting ||

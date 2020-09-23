@@ -1414,4 +1414,44 @@ Client version: '{0}'</value>
   <data name="ShowStatsChangedMessage" xml:space="preserve">
     <value>Inform when stats change</value>
   </data>
+  <data name="ScriptsManager_Create_InvalidName" xml:space="preserve">
+    <value>That script name is either invalid or already in use.</value>
+  </data>
+  <data name="ScriptsManager_UI_NewScript" xml:space="preserve">
+    <value>New Script</value>
+  </data>
+  <data name="ScriptsManager_UI_ScriptsTab" xml:space="preserve">
+    <value>Scripts</value>
+  </data>
+  <data name="ScriptsManager_UI_DeleteConfirmation" xml:space="preserve">
+    <value>Do you want
+to delete it?</value>
+  </data>
+  <data name="ScriptsManager_UI_DeleteScript" xml:space="preserve">
+    <value>Delete Script</value>
+  </data>
+  <data name="ScriptsManager_UI_ScriptName" xml:space="preserve">
+    <value>Script Name</value>
+  </data>
+  <data name="ScriptsManager_UI_OpenScriptsDirectory" xml:space="preserve">
+    <value>Scripts Folder</value>
+  </data>
+  <data name="ScriptsManager_UI_ExternalEditor" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="ScriptsManager_UI_Rename" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="ScriptsManager_UI_Restore" xml:space="preserve">
+    <value>Restore</value>
+  </data>
+  <data name="ScriptsManager_UI_Run" xml:space="preserve">
+    <value>Run</value>
+  </data>
+  <data name="ScriptsManager_UI_Stop" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="ScriptsManager_UI_Sync" xml:space="preserve">
+    <value>Sync</value>
+  </data>
 </root>
