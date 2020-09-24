@@ -508,6 +508,18 @@ namespace ClassicUO.Game
             Socket.Send(new PTradeResponse(serial, 1, false));
         }
 
+        public static void Unequip(Layer layer)
+        {
+            var equippedItem = World.Player.FindItemByLayer(layer);
+
+            if (equippedItem == null) return;
+
+            var backpack = World.Player.FindItemByLayer(Layer.Backpack);
+
+            PickUp(equippedItem, 0, 0, 1);
+            DropItem(equippedItem, 0xFFFF, 0xFFFF, 0, backpack);
+        }
+
         public static void AllNames()
         {
             foreach (Mobile mobile in World.Mobiles)
