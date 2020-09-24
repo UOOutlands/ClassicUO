@@ -308,11 +308,6 @@ namespace ClassicUO.Game.Scripting
             return true;
         }
 
-        private static Item FindItemOnGround(ushort graphic, ushort hue, int range)
-        {
-
-        }
-
         private static bool UseType(string command, Argument[] args, bool quiet, bool force)
         {
             if (args.Length < 1)
@@ -324,6 +319,7 @@ namespace ClassicUO.Game.Scripting
             Item source = World.Player.FindItemByLayer(Layer.Backpack);
 
             var graphic = args[0].AsUShort();
+            var graphicString = args[0].AsString();
 
             if (args.Length > 1 && string.Compare(args[1].AsString(), "any", true) != 0)
             {
@@ -345,11 +341,11 @@ namespace ClassicUO.Game.Scripting
 
             var range = args.Length > 3 ? args[3].AsInt() : 0;
 
-            Item item = null;
+            Item item;
 
             if (searchGround)
             {
-                item = FindItemOnGround(graphic, hue, range);
+                item = World.Player.FindItemByTypeOnGroundWithHueInRange(graphic, hue, range);
             }
             else
             {
@@ -362,9 +358,9 @@ namespace ClassicUO.Game.Scripting
             {
                 GameActions.DoubleClick(item);
             }
-            else
+            else if (!quiet)
             {
-                // some message about not finding item?
+                GameActions.Print($"Script Error: Couldn't find '{graphicString}'", type: MessageType.System);
             }
 
             return true;
