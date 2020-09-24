@@ -71,10 +71,10 @@ namespace ClassicUO.Game.Scripting
             Interpreter.RegisterCommandHandler("setability", SetAbility);
             Interpreter.RegisterCommandHandler("pause", Pause);
             Interpreter.RegisterCommandHandler("attack", Attack);
+            Interpreter.RegisterCommandHandler("clearhands", ClearHands);
+            Interpreter.RegisterCommandHandler("clickobject", ClickObject);
+            Interpreter.RegisterCommandHandler("usetype", UseType);
 
-            //Interpreter.RegisterCommandHandler("clearhands", ClearHands);
-            //Interpreter.RegisterCommandHandler("clickobject", ClickObject);
-            //Interpreter.RegisterCommandHandler("usetype", UseType);
             //Interpreter.RegisterCommandHandler("useobject", UseObject);
             //Interpreter.RegisterCommandHandler("useonce", UseOnce);
             //Interpreter.RegisterCommandHandler("clearuseonce", CleanUseQueue);
@@ -266,39 +266,40 @@ namespace ClassicUO.Game.Scripting
             return true;
         }
 
+        private static bool ClearHands(string command, Argument[] args, bool quiet, bool force)
+        {
+            if (args.Length == 0 || !hands.Contains(args[0].AsString()))
+                throw new RunTimeError(null, "Usage: clearhands ('left'/'right'/'both')");
 
+            switch (args[0].AsString())
+            {
+                case "left":
+                    GameActions.Unequip(Layer.OneHanded);
+                    break;
+                case "right":
+                    GameActions.Unequip(Layer.TwoHanded);
+                    break;
+                // case "both":
+                default:
+                    GameActions.Unequip(Layer.OneHanded);
+                    GameActions.Unequip(Layer.TwoHanded);
+                    break;
+            }
 
-        //private static bool ClearHands(string command, Argument[] args, bool quiet, bool force)
-        //{
-        //    if (args.Length == 0 || !hands.Contains(args[0].AsString()))
-        //        throw new RunTimeError(null, "Usage: clearhands ('left'/'right'/'both')");
+            return true;
+        }
 
-        //    switch (args[0].AsString())
-        //    {
-        //        case "left":
-        //            Dress.Unequip(Layer.LeftHand);
-        //            break;
-        //        case "right":
-        //            Dress.Unequip(Layer.RightHand);
-        //            break;
-        //        default:
-        //            Dress.Unequip(Layer.LeftHand);
-        //            Dress.Unequip(Layer.RightHand);
-        //            break;
-        //    }
+        private static bool ClickObject(string command, Argument[] args, bool quiet, bool force)
+        {
+            if (args.Length == 0)
+                throw new RunTimeError(null, "Usage: clickobject (serial)");
 
-        //    return true;
-        //}
-        //private static bool ClickObject(string command, Argument[] args, bool quiet, bool force)
-        //{
-        //    if (args.Length == 0)
-        //        throw new RunTimeError(null, "Usage: clickobject (serial)");
+            uint serial = args[0].AsSerial();
 
-        //    uint serial = args[0].AsSerial();
-        //    Client.Instance.SendToServer(new SingleClick(serial));
+            GameActions.SingleClick(serial);
 
-        //    return true;
-        //}
+            return true;
+        }
 
         private static bool BandageSelf(string command, Argument[] args, bool quiet, bool force)
         {
@@ -306,10 +307,51 @@ namespace ClassicUO.Game.Scripting
             return true;
         }
 
-        //private static bool UseType(string command, Argument[] args, bool quiet, bool force)
-        //{
-        //    return true;
-        //}
+        private static bool UseType(string command, Argument[] args, bool quiet, bool force)
+        {
+            if (args.Length < 1)
+                throw new RunTimeError(null, "Usage: usetype (graphic) [color] [source] [range or search level]");
+
+            var useColor = false;
+            var useGround = false;
+
+            ushort color = 0;
+            uint source = World.Player.FindItemByLayer(Layer.Backpack);
+
+            var graphic = args[0].AsUShort();
+
+            if (args.Length > 1)
+            {
+                if (string.Compare(args[1].AsString(), "any", true) != 0)
+                {
+                    useColor = true;
+                    color = args[1].AsUShort();
+                }
+            }
+
+            if (args.Length > 2)
+            {
+                if (string.Compare(args[2].AsString(), "ground", true) == 0)
+                {
+                    useGround = true;
+                }
+                else
+                {
+                    useGround = false;
+                    source = args[2].AsSerial();
+                }
+            }
+
+            var range = args.Length > 3 ? args[3].AsInt() : 0;
+
+            // todo: find item using the source, color, and range
+
+            var item = World.Player.FindItemByGraphic(graphic);
+
+            GameActions.DoubleClick(item);
+
+            return true;
+        }
 
         //private static bool UseObject(string command, Argument[] args, bool quiet, bool force)
         //{
