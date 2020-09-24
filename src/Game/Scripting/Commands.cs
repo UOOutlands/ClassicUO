@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.GameObjects;
 
 namespace ClassicUO.Game.Scripting
 {
@@ -307,48 +308,64 @@ namespace ClassicUO.Game.Scripting
             return true;
         }
 
+        private static Item FindItemOnGround(ushort graphic, ushort hue, int range)
+        {
+
+        }
+
         private static bool UseType(string command, Argument[] args, bool quiet, bool force)
         {
             if (args.Length < 1)
                 throw new RunTimeError(null, "Usage: usetype (graphic) [color] [source] [range or search level]");
 
-            var useColor = false;
-            var useGround = false;
+            var searchGround = false;
 
-            ushort color = 0;
-            uint source = World.Player.FindItemByLayer(Layer.Backpack);
+            ushort hue = 0xFFFF;
+            Item source = World.Player.FindItemByLayer(Layer.Backpack);
 
             var graphic = args[0].AsUShort();
 
-            if (args.Length > 1)
+            if (args.Length > 1 && string.Compare(args[1].AsString(), "any", true) != 0)
             {
-                if (string.Compare(args[1].AsString(), "any", true) != 0)
-                {
-                    useColor = true;
-                    color = args[1].AsUShort();
-                }
+                hue = args[1].AsUShort();
             }
 
             if (args.Length > 2)
             {
                 if (string.Compare(args[2].AsString(), "ground", true) == 0)
                 {
-                    useGround = true;
+                    searchGround = true;
                 }
                 else
                 {
-                    useGround = false;
-                    source = args[2].AsSerial();
+                    searchGround = false;
+                    source = World.Items.Get(args[2].AsSerial());
                 }
             }
 
             var range = args.Length > 3 ? args[3].AsInt() : 0;
 
-            // todo: find item using the source, color, and range
+            Item item = null;
 
-            var item = World.Player.FindItemByGraphic(graphic);
+            if (searchGround)
+            {
+                item = FindItemOnGround(graphic, hue, range);
+            }
+            else
+            {
+                item = World.Player
+                    .FindItemByLayer(Layer.Backpack)
+                    .FindItem(graphic, hue);
+            }
 
-            GameActions.DoubleClick(item);
+            if (item != null)
+            {
+                GameActions.DoubleClick(item);
+            }
+            else
+            {
+                // some message about not finding item?
+            }
 
             return true;
         }
