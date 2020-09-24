@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 
 namespace ClassicUO.Game.Scripting
 {
@@ -64,6 +65,8 @@ namespace ClassicUO.Game.Scripting
             #region Deprecated
             Interpreter.RegisterCommandHandler("autoloot", Deprecated);
             Interpreter.RegisterCommandHandler("toggleautoloot", Deprecated);
+            Interpreter.RegisterCommandHandler("useonce", Deprecated);
+            Interpreter.RegisterCommandHandler("clearuseonce", Deprecated);
             #endregion
 
             Interpreter.RegisterCommandHandler("bandageself", BandageSelf);
@@ -75,11 +78,9 @@ namespace ClassicUO.Game.Scripting
             Interpreter.RegisterCommandHandler("clearhands", ClearHands);
             Interpreter.RegisterCommandHandler("clickobject", ClickObject);
             Interpreter.RegisterCommandHandler("usetype", UseType);
+            Interpreter.RegisterCommandHandler("useobject", UseObject);
+            Interpreter.RegisterCommandHandler("moveitem", MoveItem);
 
-            //Interpreter.RegisterCommandHandler("useobject", UseObject);
-            //Interpreter.RegisterCommandHandler("useonce", UseOnce);
-            //Interpreter.RegisterCommandHandler("clearuseonce", CleanUseQueue);
-            //Interpreter.RegisterCommandHandler("moveitem", MoveItem);
             //Interpreter.RegisterCommandHandler("walk", Walk);
             //Interpreter.RegisterCommandHandler("turn", Turn);
             //Interpreter.RegisterCommandHandler("run", Run);
@@ -121,6 +122,7 @@ namespace ClassicUO.Game.Scripting
             //Interpreter.RegisterCommandHandler("settimer", SetTimer);
             //Interpreter.RegisterCommandHandler("removetimer", RemoveTimer);
             //Interpreter.RegisterCommandHandler("createtimer", CreateTimer);
+
 
             Interpreter.RegisterCommandHandler("fly", UnimplementedCommand);
             Interpreter.RegisterCommandHandler("land", UnimplementedCommand);
@@ -311,7 +313,9 @@ namespace ClassicUO.Game.Scripting
         private static bool UseType(string command, Argument[] args, bool quiet, bool force)
         {
             if (args.Length < 1)
+            {
                 throw new RunTimeError(null, "Usage: usetype (graphic) [color] [source] [range or search level]");
+            }
 
             var searchGround = false;
 
@@ -366,47 +370,65 @@ namespace ClassicUO.Game.Scripting
             return true;
         }
 
-        //private static bool UseObject(string command, Argument[] args, bool quiet, bool force)
-        //{
-        //    if (args.Length == 0)
-        //        throw new RunTimeError(null, "Usage: useobject (serial)");
+        private static bool UseObject(string command, Argument[] args, bool quiet, bool force)
+        {
+            if (args.Length == 0)
+            {
+                throw new RunTimeError(null, "Usage: useobject (serial)");
+            }
 
-        //    Serial serial = args[0].AsSerial();
+            var serial = args[0].AsSerial();
 
-        //    if (!serial.IsValid)
-        //        ScriptManager.Error(quiet, command, "Object not found.");
-        //    else
-        //        Client.Instance.SendToServer(new DoubleClick(serial));
+            if (!SerialHelper.IsValid(serial) && !quiet)
+            {
+                GameActions.Print("Object not found.", type: MessageType.System);
+            }
+            else
+            {
+                GameActions.DoubleClick(serial);
+            }
 
-        //    return true;
-        //}
+            return true;
+        }
 
-        //private static bool UseOnce(string command, Argument[] args, bool quiet, bool force)
-        //{
-        //    return true;
-        //}
+        private static bool MoveItem(string command, Argument[] args, bool quiet, bool force)
+        {
+            if (args.Length < 2)
+            {
+                throw new RunTimeError(null, "Usage: moveitem (serial) (destination) [(x, y, z)] [amount]");
+            }
 
-        //private static bool CleanUseQueue(string command, Argument[] args, bool quiet, bool force)
-        //{
-        //    return true;
-        //}
+            uint serial = args[0].AsSerial();
+            uint destination = args[1].AsSerial();
 
-        //private static bool MoveItem(string command, Argument[] args, bool quiet, bool force)
-        //{
-        //    if (args.Length < 2)
-        //        throw new RunTimeError(null, "Usage: moveitem (serial) (destination) [(x, y, z)] [amount]");
+            int x = 0;
+            int y = 0;
+            int z = 0;
 
-        //    uint serial = args[0].AsSerial();
-        //    uint destination = args[1].AsSerial();
-        //    if (args.Length == 2)
-        //        DragDropManager.DragDrop(World.FindItem((uint)serial), World.FindItem((uint)destination));
-        //    else if (args.Length == 5)
-        //        return true;
-        //    else if (args.Length == 6)
-        //        return true;
+            int amount = -1;
 
-        //    return true;
-        //}
+            if (args.Length >= 5)
+            {
+                x = args[2].AsInt();
+                y = args[3].AsInt();
+                z = args[4].AsInt();
+            }
+
+            if (args.Length == 6)
+            {
+                amount = args[5].AsInt();
+            }
+
+            GameActions.PickUp(serial, 0, 0, amount);
+            GameActions.DropItem(
+                serial, 
+                x + World.Player.X,
+                y + World.Player.Y,
+                z + World.Player.Z, 
+                destination);
+
+            return true;
+        }
 
         //private static bool Walk(string command, Argument[] args, bool quiet, bool force)
         //{

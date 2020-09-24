@@ -56,6 +56,7 @@ namespace ClassicUO.Game.Managers
 
         static ScriptManager()
         {
+            Aliases.Register();
             Commands.Register();
         }
 
