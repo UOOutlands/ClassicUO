@@ -1,4 +1,4 @@
-#region license
+﻿#region license
 
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
@@ -58,6 +58,7 @@ namespace ClassicUO.Game.Scripting
         private static readonly TimeSpan runMs = TimeSpan.FromMilliseconds(200);
         private static readonly TimeSpan mountedWalkMs = TimeSpan.FromMilliseconds(200);
         private static readonly TimeSpan mountedRunMs = TimeSpan.FromMilliseconds(100);
+        private static readonly TimeSpan turnMs = TimeSpan.FromMilliseconds(Constants.TURN_DELAY);
 
         private static DateTime movementCooldown = DateTime.UtcNow;
 
@@ -84,9 +85,9 @@ namespace ClassicUO.Game.Scripting
             Interpreter.RegisterCommandHandler("useobject", UseObject);
             Interpreter.RegisterCommandHandler("moveitem", MoveItem);
             Interpreter.RegisterCommandHandler("walk", Walk);
+            Interpreter.RegisterCommandHandler("run", Run);
 
             //Interpreter.RegisterCommandHandler("turn", Turn);
-            //Interpreter.RegisterCommandHandler("run", Run);
             //Interpreter.RegisterCommandHandler("feed", Feed);
             //Interpreter.RegisterCommandHandler("rename", Rename);
             //Interpreter.RegisterCommandHandler("shownames", ShowNames);
@@ -483,27 +484,45 @@ namespace ClassicUO.Game.Scripting
         //    return true;
         //}
 
-        //private static bool Run(string command, Argument[] args, bool quiet, bool force)
-        //{
-        //    if (args.Length != 1)
-        //        throw new RunTimeError(null, "Usage: run ('direction name')");
+        private static bool Run(string command, Argument[] args, bool quiet, bool force)
+        {
+            if (args.Length != 1)
+            {
+                throw new RunTimeError(null, "Usage: run ('direction name')");
+            }
 
-        //    if (!_directions.TryGetValue(args[0].AsString().ToLower(), out var dir))
-        //        throw new RunTimeError(null, "Usage: run ('direction name')");
+            if (!directions.TryGetValue(args[0].AsString().ToLower(), out var dir))
+            {
+                throw new RunTimeError(null, "Usage: run ('direction name')");
+            }
 
-        //    var delay = RUN_MS;
-        //    if (World.Player.GetItemOnLayer(Layer.Mount) != null)
-        //        delay = MOUNTED_RUN_MS;
+            if (DateTime.UtcNow < movementCooldown)
+            {
+                return false;
+            }
 
-        //    if (ScriptManager.LastMove + delay >= DateTime.UtcNow)
-        //        return false;
+            if (World.Player.Direction != dir)
+            {
+                // if the player is not currently facing into the direction of the run
+                // then the player will turn first, and run next - this helps so that 
+                // scripts do not need to include "turn" commands or call "run" multiple
+                // times just to achieve the same result
+                movementCooldown = DateTime.UtcNow + turnMs;
+                World.Player.Walk(dir, true);
+                return false;
+            }
 
-        //    ScriptManager.LastMove = DateTime.UtcNow;
+            var movementDelay = runMs;
 
-        //    Client.Instance?.RequestMove(dir & Direction.Running);
+            if (World.Player.FindItemByLayer(Layer.Mount) != null)
+            {
+                movementDelay = mountedRunMs;
+            }
 
-        //    return true;
-        //}
+            movementCooldown = DateTime.UtcNow + movementDelay;
+
+            return World.Player.Walk(dir, true);
+        }
 
         private static bool UseSkill(string command, Argument[] args, bool quiet, bool force)
         {
