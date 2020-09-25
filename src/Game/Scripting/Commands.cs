@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -58,6 +59,8 @@ namespace ClassicUO.Game.Scripting
         private static readonly TimeSpan mountedWalkMs = TimeSpan.FromMilliseconds(200);
         private static readonly TimeSpan mountedRunMs = TimeSpan.FromMilliseconds(100);
 
+        private static DateTime movementCooldown = DateTime.UtcNow;
+
         private static bool _hasPrompt = false;
 
         public static void Register()
@@ -80,8 +83,8 @@ namespace ClassicUO.Game.Scripting
             Interpreter.RegisterCommandHandler("usetype", UseType);
             Interpreter.RegisterCommandHandler("useobject", UseObject);
             Interpreter.RegisterCommandHandler("moveitem", MoveItem);
+            Interpreter.RegisterCommandHandler("walk", Walk);
 
-            //Interpreter.RegisterCommandHandler("walk", Walk);
             //Interpreter.RegisterCommandHandler("turn", Turn);
             //Interpreter.RegisterCommandHandler("run", Run);
             //Interpreter.RegisterCommandHandler("feed", Feed);
@@ -421,36 +424,50 @@ namespace ClassicUO.Game.Scripting
 
             GameActions.PickUp(serial, 0, 0, amount);
             GameActions.DropItem(
-                serial, 
+                serial,
                 x + World.Player.X,
                 y + World.Player.Y,
-                z + World.Player.Z, 
+                z + World.Player.Z,
                 destination);
 
             return true;
         }
 
-        //private static bool Walk(string command, Argument[] args, bool quiet, bool force)
-        //{
-        //    if (args.Length != 1)
-        //        throw new RunTimeError(null, "Usage: walk ('direction name')");
+        private static bool Walk(string command, Argument[] args, bool quiet, bool force)
+        {
+            if (args.Length != 1)
+            {
+                throw new RunTimeError(null, "Usage: walk ('direction name')");
+            }
 
-        //    if (!_directions.TryGetValue(args[0].AsString().ToLower(), out var dir))
-        //        throw new RunTimeError(null, "Usage: walk ('direction name')");
+            if (!directions.TryGetValue(args[0].AsString().ToLower(), out var dir))
+            {
+                throw new RunTimeError(null, "Usage: walk ('direction name')");
+            }
 
-        //    var delay = WALK_MS;
-        //    if (World.Player.GetItemOnLayer(Layer.Mount) != null)
-        //        delay = MOUNTED_WALK_MS;
+            if (DateTime.UtcNow < movementCooldown)
+            {
+                return false;
+            }
 
-        //    if (ScriptManager.LastMove + delay >= DateTime.UtcNow)
-        //        return false;
+            var movementDelay = ProfileManager.Current.AlwaysRun ? runMs : walkMs;
 
-        //    ScriptManager.LastMove = DateTime.UtcNow;
+            if (World.Player.FindItemByLayer(Layer.Mount) != null)
+            {
+                if (ProfileManager.Current.AlwaysRun)
+                {
+                    movementDelay = mountedRunMs;
+                }
+                else
+                {
+                    movementDelay = mountedWalkMs;
+                }
+            }
 
-        //    Client.Instance?.RequestMove(dir);
+            movementCooldown = DateTime.UtcNow + movementDelay;
 
-        //    return true;
-        //}
+            return World.Player.Walk(dir, false);
+        }
 
         //private static bool Turn(string command, Argument[] args, bool quiet, bool force)
         //{
