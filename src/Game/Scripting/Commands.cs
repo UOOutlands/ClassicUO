@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
@@ -466,7 +466,7 @@ namespace ClassicUO.Game.Scripting
 
             movementCooldown = DateTime.UtcNow + movementDelay;
 
-            return World.Player.Walk(dir, false);
+            return World.Player.Walk(dir, ProfileManager.Current.AlwaysRun);
         }
 
         //private static bool Turn(string command, Argument[] args, bool quiet, bool force)
