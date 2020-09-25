@@ -86,8 +86,7 @@ namespace ClassicUO.Game.Scripting
             Interpreter.RegisterCommandHandler("moveitem", MoveItem);
             Interpreter.RegisterCommandHandler("walk", Walk);
             Interpreter.RegisterCommandHandler("run", Run);
-
-            //Interpreter.RegisterCommandHandler("turn", Turn);
+            Interpreter.RegisterCommandHandler("turn", Turn);
             //Interpreter.RegisterCommandHandler("feed", Feed);
             //Interpreter.RegisterCommandHandler("rename", Rename);
             //Interpreter.RegisterCommandHandler("shownames", ShowNames);
@@ -481,19 +480,31 @@ namespace ClassicUO.Game.Scripting
             return World.Player.Walk(dir, ProfileManager.Current.AlwaysRun);
         }
 
-        //private static bool Turn(string command, Argument[] args, bool quiet, bool force)
-        //{
-        //    if (args.Length != 1)
-        //        throw new RunTimeError(null, "Usage: turn ('direction name')");
+        private static bool Turn(string command, Argument[] args, bool quiet, bool force)
+        {
+            if (args.Length != 1)
+            {
+                throw new RunTimeError(null, "Usage: turn ('direction name')");
+            }
 
-        //    if (!_directions.TryGetValue(args[0].AsString().ToLower(), out var dir))
-        //        throw new RunTimeError(null, "Usage: turn ('direction name')");
+            if (!directions.TryGetValue(args[0].AsString().ToLower(), out var dir))
+            {
+                throw new RunTimeError(null, "Usage: turn ('direction name')");
+            }
 
-        //    if ((World.Player.Direction & Direction.Mask) != dir)
-        //        Client.Instance?.RequestMove(dir);
+            if (DateTime.UtcNow < movementCooldown)
+            {
+                return false;
+            }
 
-        //    return true;
-        //}
+            if (World.Player.Direction != dir)
+            {
+                movementCooldown = DateTime.UtcNow + turnMs;
+                World.Player.Walk(dir, true);
+            }
+
+            return true;
+        }
 
         private static bool Run(string command, Argument[] args, bool quiet, bool force)
         {
