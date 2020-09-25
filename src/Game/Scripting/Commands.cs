@@ -451,6 +451,17 @@ namespace ClassicUO.Game.Scripting
                 return false;
             }
 
+            if (World.Player.Direction != dir)
+            {
+                // if the player is not currently facing into the direction of the run
+                // then the player will turn first, and run next - this helps so that 
+                // scripts do not need to include "turn" commands or call "run" multiple
+                // times just to achieve the same result
+                movementCooldown = DateTime.UtcNow + turnMs;
+                World.Player.Walk(dir, true);
+                return false;
+            }
+
             var movementDelay = ProfileManager.Current.AlwaysRun ? runMs : walkMs;
 
             if (World.Player.FindItemByLayer(Layer.Mount) != null)
