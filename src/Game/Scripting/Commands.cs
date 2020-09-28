@@ -88,7 +88,7 @@ namespace ClassicUO.Game.Scripting
             Interpreter.RegisterCommandHandler("run", Run);
             Interpreter.RegisterCommandHandler("turn", Turn);
             //Interpreter.RegisterCommandHandler("feed", Feed);
-            //Interpreter.RegisterCommandHandler("rename", Rename);
+            Interpreter.RegisterCommandHandler("rename", Rename);
             //Interpreter.RegisterCommandHandler("shownames", ShowNames);
             //Interpreter.RegisterCommandHandler("togglehands", ToggleHands);
             //Interpreter.RegisterCommandHandler("equipitem", EquipItem);
@@ -572,16 +572,20 @@ namespace ClassicUO.Game.Scripting
         //    return true;
         //}
 
-        //private static bool Rename(string command, Argument[] args, bool quiet, bool force)
-        //{
-        //    if (args.Length != 2)
-        //        throw new RunTimeError(null, "Usage: rename (serial) ('name')");
+        private static bool Rename(string command, Argument[] args, bool quiet, bool force)
+        {
+            if (args.Length != 2)
+            {
+                throw new RunTimeError(null, "Usage: rename (serial) ('name')");
+            }
 
-        //    uint targetSerial = args[0].AsSerial();
+            var target = args[0].AsSerial();
+            var name = args[1].AsString();
 
-        //    Client.Instance.SendToServer(new RenameReq(targetSerial, args[1].AsString()));
-        //    return true;
-        //}
+            GameActions.Rename(target, name);
+
+            return true;
+        }
 
         //private static bool SetAlias(string command, Argument[] args, bool quiet, bool force)
         //{
