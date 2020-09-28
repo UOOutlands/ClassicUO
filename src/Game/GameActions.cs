@@ -654,6 +654,16 @@ namespace ClassicUO.Game
             }
         }
 
+        public static void RequestDisarm()
+        {
+            Socket.Send(new PDisarmRequest());
+        }
+
+        public static void RequestStun()
+        {
+            Socket.Send(new PStunRequest());
+        }
+
         public static void OpenDoor()
         {
             Socket.Send(new POpenDoor());
@@ -714,6 +724,11 @@ namespace ClassicUO.Game
             ability ^= (Ability) 0x80;
         }
 
+        public static void ClearAbility()
+        {
+            Socket.Send(new PUseCombatAbility(0));
+        }
+
         public static void QuestArrow(bool rightClick)
         {
             Socket.Send(new PClickQuestArrow(rightClick));
@@ -746,6 +761,43 @@ namespace ClassicUO.Game
 
             PickUp(serial, 0, 0, amount);
             DropItem(serial, 0xFFFF, 0xFFFF, 0, bag);
+        }
+
+        public static void BandageSelf()
+        {
+            Item bandage = World.Player.FindBandage();
+
+            if (bandage != null)
+            {
+                Socket.Send(new PTargetSelectedObject(bandage.Serial, World.Player.Serial));
+            }
+        }
+
+        public static void UseLastSkill()
+        {
+            Socket.Send(new PUseSkill(LastSkillIndex));
+        }
+
+        public static bool UseSkill(string skillName)
+        {
+            int skillIndex = -1;
+
+            for (int i = 0; i < World.Player.Skills.Length; i++)
+            {
+                if (string.Compare(World.Player.Skills[i].Name, skillName, true) == 0)
+                {
+                    skillIndex = i;
+                    break;
+                }
+            }
+
+            if (skillIndex != -1)
+            {
+                UseSkill(skillIndex);
+                return true;
+            }
+
+            return false;
         }
     }
 }
