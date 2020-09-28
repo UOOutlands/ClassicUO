@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
@@ -277,9 +277,11 @@ namespace ClassicUO.Game.Scripting
         private static bool ClearHands(string command, Argument[] args, bool quiet, bool force)
         {
             if (args.Length == 0 || !hands.Contains(args[0].AsString()))
+            {
                 throw new RunTimeError(null, "Usage: clearhands ('left'/'right'/'both')");
+            }
 
-            switch (args[0].AsString())
+            switch (args[0].AsString().ToLower())
             {
                 case "left":
                     GameActions.Unequip(Layer.OneHanded);
