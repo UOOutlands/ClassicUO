@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
@@ -232,7 +232,9 @@ namespace ClassicUO.Game.Scripting
             var ability = args[0].AsString();
 
             if (args.Length < 1 || !abilities.Contains(ability))
+            {
                 throw new RunTimeError(null, "Usage: setability ('primary'/'secondary'/'stun'/'disarm') ['on'/'off']");
+            }
 
             if (args.Length == 2 && args[1].AsString() == "on" || args.Length == 1)
             {
