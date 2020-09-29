@@ -89,7 +89,7 @@ namespace ClassicUO.Game.Scripting
             Interpreter.RegisterCommandHandler("turn", Turn);
             //Interpreter.RegisterCommandHandler("feed", Feed);
             Interpreter.RegisterCommandHandler("rename", Rename);
-            //Interpreter.RegisterCommandHandler("shownames", ShowNames);
+            Interpreter.RegisterCommandHandler("shownames", ShowNames);
             //Interpreter.RegisterCommandHandler("togglehands", ToggleHands);
             //Interpreter.RegisterCommandHandler("equipitem", EquipItem);
             //Interpreter.RegisterCommandHandler("dress", DressCommand);
@@ -232,7 +232,9 @@ namespace ClassicUO.Game.Scripting
             var ability = args[0].AsString();
 
             if (args.Length < 1 || !abilities.Contains(ability))
+            {
                 throw new RunTimeError(null, "Usage: setability ('primary'/'secondary'/'stun'/'disarm') ['on'/'off']");
+            }
 
             if (args.Length == 2 && args[1].AsString() == "on" || args.Length == 1)
             {
@@ -748,27 +750,42 @@ namespace ClassicUO.Game.Scripting
         //    return true;
         //}
 
-        //private static bool ShowNames(string command, Argument[] args, bool quiet, bool force)
-        //{
-        //    if (args.Length == 0 || args[0].AsString() == "mobiles")
-        //    {
-        //        foreach (Mobile m in World.MobilesInRange())
-        //        {
-        //            if (m != World.Player)
-        //                Client.Instance.SendToServer(new SingleClick(m));
-        //        }
-        //    }
-        //    else if (args[0].AsString() == "corpses")
-        //    {
-        //        foreach (Item i in World.Items.Values)
-        //        {
-        //            if (i.IsCorpse)
-        //                Client.Instance.SendToServer(new SingleClick(i));
-        //        }
-        //    }
+        private static bool ShowNames(string command, Argument[] args, bool quiet, bool force)
+        {
+            if (args.Length == 0)
+            {
+                throw new RunTimeError(null, "Usage: shownames ('mobiles'/'corpses')");
+            }
 
-        //    return true;
-        //}
+            var category = args[0].AsString();
+
+            switch (category?.ToLower())
+            {
+                case "mobiles":
+                    {
+                        foreach (var mobile in World.Mobiles)
+                        {
+                            GameActions.SingleClick(mobile.Serial);
+                        }
+                    }
+                    break;
+                case "corpses":
+                    {
+                        foreach (var item in World.Items)
+                        {
+                            if (item.IsCorpse)
+                            {
+                                GameActions.SingleClick(item.Serial);
+                            }
+                        }
+                    }
+                    break;
+                default:
+                    throw new RunTimeError(null, "Usage: shownames ('mobiles'/'corpses')");
+            }
+
+            return true;
+        }
 
         //public static bool ToggleHands(string command, Argument[] args, bool quiet, bool force)
         //{
