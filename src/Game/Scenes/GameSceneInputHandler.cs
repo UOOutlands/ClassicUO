@@ -337,7 +337,7 @@ namespace ClassicUO.Game.Scenes
             }
             else
             {
-                SelectedObject.LastLeftDownObject = SelectedObject.Object as Entity;
+                SelectedObject.LastLeftDownObject = SelectedObject.Object;
 
                 if (ProfileManager.Current.EnableDragSelect && DragSelectModifierActive())
                 {
@@ -399,6 +399,7 @@ namespace ClassicUO.Game.Scenes
                 _continueRunning = true;
             }
 
+            BaseGameObject lastObj = SelectedObject.LastLeftDownObject;
             SelectedObject.LastLeftDownObject = null;
 
             if (UIManager.IsDragging)
@@ -430,8 +431,8 @@ namespace ClassicUO.Game.Scenes
                             drop_container = obj.Serial;
                         }
                         else if (obj is Item it2 && (it2.ItemData.IsSurface ||
-                                                     it2.ItemData.IsStackable && it2.DisplayedGraphic ==
-                                                     ItemHold.DisplayedGraphic))
+                                                     it2.ItemData.IsStackable && it2.Graphic ==
+                                                     ItemHold.Graphic))
                         {
                             if (!it2.ItemData.IsSurface)
                             {
@@ -488,7 +489,7 @@ namespace ClassicUO.Game.Scenes
                     case CursorTarget.Object:
                     case CursorTarget.MultiPlacement when World.CustomHouseManager == null:
                     {
-                        BaseGameObject obj = SelectedObject.Object;
+                        BaseGameObject obj = lastObj;
 
                         if (obj is TextObject ov)
                         {
@@ -520,7 +521,7 @@ namespace ClassicUO.Game.Scenes
 
                     case CursorTarget.SetTargetClientSide:
                     {
-                        BaseGameObject obj = SelectedObject.Object;
+                        BaseGameObject obj = lastObj;
 
                         if (obj is TextObject ov)
                         {
@@ -569,7 +570,7 @@ namespace ClassicUO.Game.Scenes
             }
             else
             {
-                GameObject obj = SelectedObject.LastObject as GameObject;
+                GameObject obj = lastObj as GameObject;
 
                 switch (obj)
                 {

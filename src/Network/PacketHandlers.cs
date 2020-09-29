@@ -2376,7 +2376,7 @@ namespace ClassicUO.Network
 
                             if (lineLen > 0)
                             {
-                                string putta = p.ReadUTF8StringSafe(len);
+                                string putta = p.ReadUTF8StringSafe(lineLen);
                                 sb.Append(putta);
                                 sb.Append('\n');
                             }
@@ -5285,12 +5285,12 @@ namespace ClassicUO.Network
                     Console.WriteLine("ADD ITEM TO CONTAINER -- CLEAR HOLD");
                     ItemHold.Clear();
                 }
-                else if (ItemHold.Graphic == graphic && ItemHold.Amount == amount &&
-                         ItemHold.Container == containerSerial)
-                {
-                    ItemHold.Enabled = false;
-                    ItemHold.Dropped = false;
-                }
+                //else if (ItemHold.Graphic == graphic && ItemHold.Amount == amount &&
+                //         ItemHold.Container == containerSerial)
+                //{
+                //    ItemHold.Enabled = false;
+                //    ItemHold.Dropped = false;
+                //}
             }
 
             Entity container = World.Get(containerSerial);
