@@ -22,6 +22,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Data;
@@ -341,9 +342,9 @@ namespace ClassicUO.Game
             }
 
             ItemHold.Clear();
-            ItemHold.Set(item, (ushort) amount, offset);
+            ItemHold.Set(item, (ushort)amount, offset);
             ItemHold.IsGumpTexture = is_gump;
-            Socket.Send(new PPickUpRequest(item, (ushort) amount));
+            Socket.Send(new PPickUpRequest(item, (ushort)amount));
             UIManager.GameCursor.SetDraggedItem(offset);
 
             if (item.OnGround)
@@ -365,15 +366,88 @@ namespace ClassicUO.Game
             {
                 if (Client.Version >= ClientVersion.CV_6017)
                 {
-                    Socket.Send(new PDropRequestNew(serial, (ushort) x, (ushort) y, (sbyte) z, 0, container));
+                    Socket.Send(new PDropRequestNew(serial, (ushort)x, (ushort)y, (sbyte)z, 0, container));
                 }
                 else
                 {
-                    Socket.Send(new PDropRequestOld(serial, (ushort) x, (ushort) y, (sbyte) z, container));
+                    Socket.Send(new PDropRequestOld(serial, (ushort)x, (ushort)y, (sbyte)z, container));
                 }
 
                 ItemHold.Enabled = false;
                 ItemHold.Dropped = true;
+            }
+        }
+
+        static readonly Dictionary<IO.ItemExt_PaperdollAppearance, Item> _toggleEquipCache =
+            new Dictionary<IO.ItemExt_PaperdollAppearance, Item>();
+
+        public static void ToggleEquip(IO.ItemExt_PaperdollAppearance appearance)
+        {
+            Item cached;
+
+            _toggleEquipCache.TryGetValue(appearance, out cached);
+
+            if (cached != null)
+            {
+                cached = World.Get(cached.Serial) as Item;
+            }
+
+            var current = World.Player.FindItemByHand(appearance);
+
+            if (current != null && current != cached)
+            {
+                cached = current;
+                _toggleEquipCache[appearance] = cached;
+            }
+
+            if (cached == null)
+            {
+                return;
+            }
+
+            var currentLeft = World.Player.FindItemByHand(IO.ItemExt_PaperdollAppearance.Left);
+            var currentRight = World.Player.FindItemByHand(IO.ItemExt_PaperdollAppearance.Right);
+
+            if (currentLeft?.RequiredHands == IO.ItemExt_RequiredHands.Two)
+            {
+                Client.Game.GetScene<GameScene>().QueueDressAction(() => Unequip(currentLeft));
+            }
+            else if (currentRight?.RequiredHands == IO.ItemExt_RequiredHands.Two)
+            {
+                Client.Game.GetScene<GameScene>().QueueDressAction(() => Unequip(currentRight));
+            }
+            else if (cached?.RequiredHands == IO.ItemExt_RequiredHands.Two)
+            {
+                if (currentLeft != null)
+                {
+                    Client.Game.GetScene<GameScene>().QueueDressAction(() => Unequip(currentLeft));
+                }
+
+                if (currentRight != null)
+                {
+                    Client.Game.GetScene<GameScene>().QueueDressAction(() => Unequip(currentRight));
+                }
+            }
+
+            // conflict if equipping left hand shield while weilding a 2h right weapon
+            // conflict if equipping right hand 2h weapon if weilding a 1h left shield
+
+            if (current == null)
+            {
+                Client.Game.GetScene<GameScene>().QueueDressAction(() =>
+                {
+                    PickUp(cached, 0, 0, 1);
+                    ItemHold.Clear();
+                    ItemHold.Set(cached, cached.Amount);
+                    Equip();
+                });
+            }
+            else
+            {
+                Client.Game.GetScene<GameScene>().QueueDressAction(() =>
+                {
+                    Unequip(current.Layer);
+                });
             }
         }
 
@@ -386,7 +460,7 @@ namespace ClassicUO.Game
                     container = World.Player.Serial;
                 }
 
-                Socket.Send(new PEquipRequest(ItemHold.Serial, (Layer) ItemHold.ItemData.Layer, container));
+                Socket.Send(new PEquipRequest(ItemHold.Serial, (Layer)ItemHold.ItemData.Layer, container));
 
                 ItemHold.Enabled = false;
                 ItemHold.Dropped = true;
@@ -520,6 +594,18 @@ namespace ClassicUO.Game
             DropItem(equippedItem, 0xFFFF, 0xFFFF, 0, backpack);
         }
 
+        public static void Unequip(Item item)
+        {
+            item = World.Get(item) as Item;
+
+            if (item == null) return;
+
+            var backpack = World.Player.FindItemByLayer(Layer.Backpack);
+
+            PickUp(item, 0, 0, 1);
+            DropItem(item, 0xFFFF, 0xFFFF, 0, backpack);
+        }
+
         public static void AllNames()
         {
             foreach (Mobile mobile in World.Mobiles)
@@ -571,42 +657,42 @@ namespace ClassicUO.Game
         {
             ref Ability ability = ref World.Player.Abilities[0];
 
-            if (((byte) ability & 0x80) == 0)
+            if (((byte)ability & 0x80) == 0)
             {
                 for (int i = 0; i < 2; i++)
                 {
-                    World.Player.Abilities[i] &= (Ability) 0x7F;
+                    World.Player.Abilities[i] &= (Ability)0x7F;
                 }
 
-                Socket.Send(new PUseCombatAbility((byte) ability));
+                Socket.Send(new PUseCombatAbility((byte)ability));
             }
             else
             {
                 Socket.Send(new PUseCombatAbility(0));
             }
 
-            ability ^= (Ability) 0x80;
+            ability ^= (Ability)0x80;
         }
 
         public static void UseSecondaryAbility()
         {
             ref Ability ability = ref World.Player.Abilities[1];
 
-            if (((byte) ability & 0x80) == 0)
+            if (((byte)ability & 0x80) == 0)
             {
                 for (int i = 0; i < 2; i++)
                 {
-                    World.Player.Abilities[i] &= (Ability) 0x7F;
+                    World.Player.Abilities[i] &= (Ability)0x7F;
                 }
 
-                Socket.Send(new PUseCombatAbility((byte) ability));
+                Socket.Send(new PUseCombatAbility((byte)ability));
             }
             else
             {
                 Socket.Send(new PUseCombatAbility(0));
             }
 
-            ability ^= (Ability) 0x80;
+            ability ^= (Ability)0x80;
         }
 
         public static void ClearAbility()

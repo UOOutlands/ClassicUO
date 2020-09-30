@@ -1,4 +1,4 @@
-#region license
+﻿#region license
 
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
@@ -90,7 +90,7 @@ namespace ClassicUO.Game.Scripting
             //Interpreter.RegisterCommandHandler("feed", Feed);
             Interpreter.RegisterCommandHandler("rename", Rename);
             Interpreter.RegisterCommandHandler("shownames", ShowNames);
-            //Interpreter.RegisterCommandHandler("togglehands", ToggleHands);
+            Interpreter.RegisterCommandHandler("togglehands", ToggleHands);
             //Interpreter.RegisterCommandHandler("equipitem", EquipItem);
             //Interpreter.RegisterCommandHandler("dress", DressCommand);
             //Interpreter.RegisterCommandHandler("undress", UnDressCommand);
@@ -787,18 +787,27 @@ namespace ClassicUO.Game.Scripting
             return true;
         }
 
-        //public static bool ToggleHands(string command, Argument[] args, bool quiet, bool force)
-        //{
-        //    if (args.Length == 0)
-        //        throw new RunTimeError(null, "Usage: togglehands ('left'/'right')");
+        public static bool ToggleHands(string command, Argument[] args, bool quiet, bool force)
+        {
+            if (args.Length == 0)
+            {
+                throw new RunTimeError(null, "Usage: togglehands ('left'/'right')");
+            }
 
-        //    if (args[0].AsString() == "left")
-        //        Dress.ToggleLeft();
-        //    else
-        //        Dress.ToggleRight();
+            switch (args[0].AsString().ToLower())
+            {
+                case "left":
+                    GameActions.ToggleEquip(IO.ItemExt_PaperdollAppearance.Left);
+                    break;
+                case "right":
+                    GameActions.ToggleEquip(IO.ItemExt_PaperdollAppearance.Right);
+                    break;
+                default:
+                    throw new RunTimeError(null, "Usage: togglehands ('left'/'right')");
+            }
 
-        //    return true;
-        //}
+            return true;
+        }
 
         //public static bool EquipItem(string command, Argument[] args, bool quiet, bool force)
         //{
