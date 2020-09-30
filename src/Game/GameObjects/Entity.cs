@@ -26,6 +26,7 @@ using System.Runtime.CompilerServices;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
+using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using static ClassicUO.Network.NetClient;
@@ -82,7 +83,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void FixHue(ushort hue)
         {
-            ushort fixedColor = (ushort) (hue & 0x3FFF);
+            ushort fixedColor = (ushort)(hue & 0x3FFF);
 
             if (fixedColor != 0)
             {
@@ -91,11 +92,11 @@ namespace ClassicUO.Game.GameObjects
                     fixedColor = 1;
                 }
 
-                fixedColor |= (ushort) (hue & 0xC000);
+                fixedColor |= (ushort)(hue & 0xC000);
             }
             else
             {
-                fixedColor = (ushort) (hue & 0x8000);
+                fixedColor = (ushort)(hue & 0x8000);
             }
 
             Hue = fixedColor;
@@ -165,7 +166,7 @@ namespace ClassicUO.Game.GameObjects
                     hits_max = 0;
                 }
 
-                UpdateHits((byte) hits_max);
+                UpdateHits((byte)hits_max);
             }
         }
 
@@ -189,7 +190,7 @@ namespace ClassicUO.Game.GameObjects
 
                 for (LinkedObject i = Items; i != null; i = i.Next)
                 {
-                    Item it = (Item) i;
+                    Item it = (Item)i;
 
                     if (it.Graphic == graphic)
                     {
@@ -216,7 +217,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 for (LinkedObject i = Items; i != null; i = i.Next)
                 {
-                    Item it = (Item) i;
+                    Item it = (Item)i;
 
                     if (it.Graphic == graphic && it.Hue == hue)
                     {
@@ -242,7 +243,7 @@ namespace ClassicUO.Game.GameObjects
         {
             for (LinkedObject i = Items; i != null; i = i.Next)
             {
-                Item item = (Item) i;
+                Item item = (Item)i;
 
                 if (item.Graphic == graphic)
                 {
@@ -253,7 +254,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     for (LinkedObject ic = Items; ic != null; ic = ic.Next)
                     {
-                        Item childItem = (Item) ic;
+                        Item childItem = (Item)ic;
 
                         Item res = childItem.GetItemByGraphic(graphic, deepsearch);
 
@@ -269,11 +270,31 @@ namespace ClassicUO.Game.GameObjects
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Item FindItemByHand(ItemExt_PaperdollAppearance appearance)
+        {
+            for (LinkedObject i = Items; i != null; i = i.Next)
+            {
+                Item it = (Item)i;
+
+                if (!it.IsDestroyed && (it.Layer == Layer.HeldInHand1 || it.Layer == Layer.HeldInHand2))
+                {
+                    if (ItemDataExtensions.TryGetValue(it.Graphic, out var ext) && 
+                        ext.PaperdollAppearance == appearance)
+                    {
+                        return it;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Item FindItemByLayer(Layer layer)
         {
             for (LinkedObject i = Items; i != null; i = i.Next)
             {
-                Item it = (Item) i;
+                Item it = (Item)i;
 
                 if (!it.IsDestroyed && it.Layer == layer)
                 {
@@ -316,7 +337,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     LinkedObject next = obj.Next;
 
-                    Item it = (Item) obj;
+                    Item it = (Item)obj;
 
                     if (it.Layer != 0)
                     {
@@ -364,7 +385,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override int GetHashCode()
         {
-            return (int) Serial;
+            return (int)Serial;
         }
 
         public abstract void ProcessAnimation(out byte dir, bool evalutate = false);
