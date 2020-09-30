@@ -582,6 +582,21 @@ namespace ClassicUO.Game
             Socket.Send(new PTradeResponse(serial, 1, false));
         }
 
+        public static void ClearEquipped(IO.ItemExt_PaperdollAppearance appearance)
+        {
+            var item = World.Player.FindItemByHand(appearance);
+
+            if (item != null)
+            {
+                var backpack = World.Player.FindItemByLayer(Layer.Backpack);
+
+                PickUp(item, 0, 0, 1);
+                DropItem(item, 0xFFFF, 0xFFFF, 0, backpack);
+            }
+
+            _toggleEquipCache[appearance] = null;
+        }
+
         public static void Unequip(Layer layer)
         {
             var equippedItem = World.Player.FindItemByLayer(layer);

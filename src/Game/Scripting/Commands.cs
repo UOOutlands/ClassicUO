@@ -279,18 +279,18 @@ namespace ClassicUO.Game.Scripting
             if (args.Length == 0 || !hands.Contains(args[0].AsString()))
                 throw new RunTimeError(null, "Usage: clearhands ('left'/'right'/'both')");
 
-            switch (args[0].AsString())
+            switch (args[0].AsString().ToLower())
             {
                 case "left":
-                    GameActions.Unequip(Layer.HeldInHand1);
+                    GameActions.ClearEquipped(IO.ItemExt_PaperdollAppearance.Left);
                     break;
                 case "right":
-                    GameActions.Unequip(Layer.HeldInHand2);
+                    GameActions.ClearEquipped(IO.ItemExt_PaperdollAppearance.Right);
                     break;
                 // case "both":
                 default:
-                    GameActions.Unequip(Layer.HeldInHand1);
-                    GameActions.Unequip(Layer.HeldInHand2);
+                    GameActions.ClearEquipped(IO.ItemExt_PaperdollAppearance.Left);
+                    GameActions.ClearEquipped(IO.ItemExt_PaperdollAppearance.Right);
                     break;
             }
 
