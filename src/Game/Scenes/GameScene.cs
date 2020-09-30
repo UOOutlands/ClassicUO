@@ -32,6 +32,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
@@ -93,12 +94,13 @@ namespace ClassicUO.Game.Scenes
         private uint _timeToPlaceMultiInHouseCustomization;
         private readonly bool _use_render_target = false;
         private UseItemQueue _useItemQueue = new UseItemQueue();
+        private DressQueue _dressQueue = new DressQueue();
         private bool _useObjectHandles;
         private Vector4 _vectorClear = new Vector4(Vector3.Zero, 1);
         private RenderTarget2D _world_render_target, _lightRenderTarget;
 
 
-        public GameScene() : base((int) SceneType.Game, true, true, true)
+        public GameScene() : base((int)SceneType.Game, true, true, true)
         {
         }
 
@@ -122,6 +124,11 @@ namespace ClassicUO.Game.Scenes
         public void DoubleClickDelayed(uint serial)
         {
             _useItemQueue.Add(serial);
+        }
+
+        public void QueueDressAction(Action dressAction)
+        {
+            _dressQueue.Add(dressAction);
         }
 
         public override void Load()
@@ -353,6 +360,10 @@ namespace ClassicUO.Game.Scenes
 
             _useItemQueue?.Clear();
             _useItemQueue = null;
+
+            _dressQueue?.Clear();
+            _dressQueue = null;
+
             Hotkeys = null;
             Macros = null;
             Scripts = null;
@@ -428,7 +439,7 @@ namespace ClassicUO.Game.Scenes
 
             if (tile != null)
             {
-                sbyte z5 = (sbyte) (obj.Z + 5);
+                sbyte z5 = (sbyte)(obj.Z + 5);
 
                 for (GameObject o = tile; o != null; o = o.TNext)
                 {
@@ -467,7 +478,7 @@ namespace ClassicUO.Game.Scenes
                     }
                     else if (lightObject is Item it)
                     {
-                        light.ID = (byte) it.ItemData.LightIndex;
+                        light.ID = (byte)it.ItemData.LightIndex;
                     }
                     else if (obj is Mobile _)
                     {
@@ -485,7 +496,7 @@ namespace ClassicUO.Game.Scenes
                     return;
                 }
 
-                light.Color = ProfileManager.Current.UseColoredLights ? LightColors.GetHue(graphic) : (ushort) 0;
+                light.Color = ProfileManager.Current.UseColoredLights ? LightColors.GetHue(graphic) : (ushort)0;
 
                 if (light.Color != 0)
                 {
@@ -537,10 +548,10 @@ namespace ClassicUO.Game.Scenes
                 NameOverHeadManager.Close();
             }
 
-            _rectanglePlayer.X = (int) (World.Player.RealScreenPosition.X - World.Player.FrameInfo.X + 22 +
+            _rectanglePlayer.X = (int)(World.Player.RealScreenPosition.X - World.Player.FrameInfo.X + 22 +
                                         World.Player.Offset.X);
 
-            _rectanglePlayer.Y = (int) (World.Player.RealScreenPosition.Y - World.Player.FrameInfo.Y + 22 +
+            _rectanglePlayer.Y = (int)(World.Player.RealScreenPosition.Y - World.Player.FrameInfo.Y + 22 +
                                         (World.Player.Offset.Y - World.Player.Offset.Z));
 
             _rectanglePlayer.Width = World.Player.FrameInfo.Width;
@@ -626,7 +637,7 @@ namespace ClassicUO.Game.Scenes
                     (force || e.Graphic == 0x2006))
                 {
                     e.UpdateRealScreenPosition(_offset.X, _offset.Y);
-                    e.UseInRender = (byte) _renderIndex;
+                    e.UseInRender = (byte)_renderIndex;
                 }
             }
         }
@@ -703,7 +714,7 @@ namespace ClassicUO.Game.Scenes
             if (totalMS > _timePing)
             {
                 NetClient.Socket.Statistics.SendPing();
-                _timePing = (long) totalMS + 1000;
+                _timePing = (long)totalMS + 1000;
             }
 
             Macros.Update();
@@ -718,12 +729,12 @@ namespace ClassicUO.Game.Scenes
             }
 
             _useItemQueue.Update(totalMS, frameMS);
+            _dressQueue.Update(totalMS, frameMS);
 
             if (!UIManager.IsMouseOverWorld)
             {
                 SelectedObject.Object = SelectedObject.LastObject = null;
             }
-
 
             if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement &&
                 World.CustomHouseManager == null && TargetManager.MultiTargetInfo != null)
@@ -766,9 +777,9 @@ namespace ClassicUO.Game.Scenes
                         groundZ = gobj.Z;
                     }
 
-                    x = (ushort) (x - TargetManager.MultiTargetInfo.XOff);
-                    y = (ushort) (y - TargetManager.MultiTargetInfo.YOff);
-                    z = (sbyte) (groundZ - TargetManager.MultiTargetInfo.ZOff);
+                    x = (ushort)(x - TargetManager.MultiTargetInfo.XOff);
+                    y = (ushort)(y - TargetManager.MultiTargetInfo.YOff);
+                    z = (sbyte)(groundZ - TargetManager.MultiTargetInfo.ZOff);
 
                     _multi.X = x;
                     _multi.Y = y;
@@ -781,9 +792,9 @@ namespace ClassicUO.Game.Scenes
                     foreach (Multi s in house.Components)
                     {
                         s.IsFromTarget = true;
-                        s.X = (ushort) (_multi.X + s.MultiOffsetX);
-                        s.Y = (ushort) (_multi.Y + s.MultiOffsetY);
-                        s.Z = (sbyte) (_multi.Z + s.MultiOffsetZ);
+                        s.X = (ushort)(_multi.X + s.MultiOffsetX);
+                        s.Y = (ushort)(_multi.Y + s.MultiOffsetY);
+                        s.Z = (sbyte)(_multi.Z + s.MultiOffsetZ);
                         s.UpdateScreenPosition();
                         s.AddToTile();
                     }
@@ -989,8 +1000,8 @@ namespace ClassicUO.Game.Scenes
 
             if (usecircle)
             {
-                int fx = (int) (World.Player.RealScreenPosition.X + World.Player.Offset.X);
-                int fy = (int) (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z));
+                int fx = (int)(World.Player.RealScreenPosition.X + World.Player.Offset.X);
+                int fy = (int)(World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z));
 
                 fx += 22;
                 //fy -= 22;
