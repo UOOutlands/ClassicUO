@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
@@ -113,12 +113,12 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (Amount > 5)
                     {
-                        return (ushort) (Graphic + 2);
+                        return (ushort)(Graphic + 2);
                     }
 
                     if (Amount > 1)
                     {
-                        return (ushort) (Graphic + 1);
+                        return (ushort)(Graphic + 1);
                     }
                 }
                 else if (IsMulti)
@@ -179,8 +179,8 @@ namespace ClassicUO.Game.GameObjects
         public ref StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[IsMulti ? MultiGraphic : Graphic];
 
         public bool IsLootable =>
-            ItemData.Layer != (int) Layer.Hair && ItemData.Layer != (int) Layer.Beard &&
-            ItemData.Layer != (int) Layer.Face && Graphic != 0;
+            ItemData.Layer != (int)Layer.Hair && ItemData.Layer != (int)Layer.Beard &&
+            ItemData.Layer != (int)Layer.Face && Graphic != 0;
 
         public ushort Amount;
         public uint Container = 0xFFFF_FFFF;

@@ -1088,7 +1088,7 @@ namespace ClassicUO.Game.GameObjects
                 default:
 
                 {
-                    Item hand2 = mobile.FindItemByLayer(Layer.TwoHanded);
+                    Item hand2 = mobile.FindItemByLayer(Layer.HeldInHand2);
 
                     if (!isWalking)
                     {
@@ -1150,7 +1150,7 @@ namespace ClassicUO.Game.GameObjects
                                 unsafe
                                 {
                                     ushort* handAnimIDs = stackalloc ushort[2];
-                                    Item hand1 = mobile.FindItemByLayer(Layer.OneHanded);
+                                    Item hand1 = mobile.FindItemByLayer(Layer.HeldInHand1);
 
                                     if (hand1 != null)
                                     {
@@ -1263,7 +1263,7 @@ namespace ClassicUO.Game.GameObjects
 
                                             if (mobile.IsGargoyle)
                                             {
-                                                hand2 = mobile.FindItemByLayer(Layer.OneHanded);
+                                                hand2 = mobile.FindItemByLayer(Layer.HeldInHand1);
                                             }
                                         }
                                     }

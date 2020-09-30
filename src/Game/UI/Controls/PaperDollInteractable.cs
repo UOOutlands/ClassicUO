@@ -40,7 +40,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             Layer.Cloak, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.Legs, Layer.Arms, Layer.Torso, Layer.Tunic,
             Layer.Ring, Layer.Bracelet, Layer.Face, Layer.Gloves, Layer.Skirt, Layer.Robe, Layer.Waist, Layer.Necklace,
-            Layer.Hair, Layer.Beard, Layer.Earrings, Layer.Helmet, Layer.OneHanded, Layer.TwoHanded, Layer.Talisman
+            Layer.Hair, Layer.Beard, Layer.Earrings, Layer.Helmet, Layer.HeldInHand1, Layer.HeldInHand2, Layer.Talisman
         };
 
         private static readonly Layer[] _layerOrder_quiver_fix =
@@ -48,7 +48,7 @@ namespace ClassicUO.Game.UI.Controls
             Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.Legs, Layer.Arms, Layer.Torso, Layer.Tunic,
             Layer.Ring, Layer.Bracelet, Layer.Face, Layer.Gloves, Layer.Skirt, Layer.Robe, Layer.Cloak, Layer.Waist,
             Layer.Necklace,
-            Layer.Hair, Layer.Beard, Layer.Earrings, Layer.Helmet, Layer.OneHanded, Layer.TwoHanded, Layer.Talisman
+            Layer.Hair, Layer.Beard, Layer.Earrings, Layer.Helmet, Layer.HeldInHand1, Layer.HeldInHand2, Layer.Talisman
         };
 
         private readonly PaperDollGump _paperDollGump;
@@ -396,7 +396,7 @@ namespace ClassicUO.Game.UI.Controls
                         GameActions.PickUp(LocalSerial, 0, 0);
                         Mouse.LDropPosition = Mouse.Position;
 
-                        if (_layer == Layer.OneHanded || _layer == Layer.TwoHanded)
+                        if (_layer == Layer.HeldInHand1 || _layer == Layer.HeldInHand2)
                         {
                             World.Player.UpdateAbilities();
                         }

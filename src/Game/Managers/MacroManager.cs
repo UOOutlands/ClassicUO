@@ -949,7 +949,7 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.UseItemInHand:
-                    Item itemInLeftHand = World.Player.FindItemByLayer(Layer.OneHanded);
+                    Item itemInLeftHand = World.Player.FindItemByLayer(Layer.HeldInHand1);
 
                     if (itemInLeftHand != null)
                     {
@@ -957,7 +957,7 @@ namespace ClassicUO.Game.Managers
                     }
                     else
                     {
-                        Item itemInRightHand = World.Player.FindItemByLayer(Layer.TwoHanded);
+                        Item itemInRightHand = World.Player.FindItemByLayer(Layer.HeldInHand2);
 
                         if (itemInRightHand != null)
                         {
@@ -1057,7 +1057,7 @@ namespace ClassicUO.Game.Managers
                             break;
                         }
 
-                        Item item = World.Player.FindItemByLayer(Layer.OneHanded + (byte) handIndex);
+                        Item item = World.Player.FindItemByLayer(Layer.HeldInHand1 + (byte) handIndex);
 
                         if (item != null)
                         {

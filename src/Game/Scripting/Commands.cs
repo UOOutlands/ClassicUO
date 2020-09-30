@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
@@ -282,15 +282,15 @@ namespace ClassicUO.Game.Scripting
             switch (args[0].AsString())
             {
                 case "left":
-                    GameActions.Unequip(Layer.OneHanded);
+                    GameActions.Unequip(Layer.HeldInHand1);
                     break;
                 case "right":
-                    GameActions.Unequip(Layer.TwoHanded);
+                    GameActions.Unequip(Layer.HeldInHand2);
                     break;
                 // case "both":
                 default:
-                    GameActions.Unequip(Layer.OneHanded);
-                    GameActions.Unequip(Layer.TwoHanded);
+                    GameActions.Unequip(Layer.HeldInHand1);
+                    GameActions.Unequip(Layer.HeldInHand2);
                     break;
             }
 
