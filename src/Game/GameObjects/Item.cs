@@ -178,6 +178,8 @@ namespace ClassicUO.Game.GameObjects
 
         public ref StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[IsMulti ? MultiGraphic : Graphic];
 
+        public Layer StaticLayer => (Layer)ItemData.Layer;
+
         public bool IsLootable =>
             ItemData.Layer != (int)Layer.Hair && ItemData.Layer != (int)Layer.Beard &&
             ItemData.Layer != (int)Layer.Face && Graphic != 0;
