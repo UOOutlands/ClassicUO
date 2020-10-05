@@ -451,6 +451,77 @@ namespace ClassicUO.Game
             }
         }
 
+        static readonly HashSet<Item> _equipConflicts = new HashSet<Item>();
+
+        public static void Equip(Item item)
+        {
+            _equipConflicts.Clear();
+
+            if (item.Layer == item.StaticLayer) return; // already equipped
+
+            if (item.RequiredHands == IO.ItemExt_RequiredHands.Invalid)
+            {
+                var conflict = World.Player.FindItemByLayer(item.StaticLayer);
+
+                if (conflict != null)
+                {
+                    _equipConflicts.Add(conflict);
+                }
+            }
+            else if (item.RequiredHands == IO.ItemExt_RequiredHands.One)
+            {
+                var conflict = World.Player.FindItemByHand(item.PaperdollAppearance);
+
+                if (conflict != null)
+                {
+                    _equipConflicts.Add(conflict);
+                }
+
+                var otherHand = item.PaperdollAppearance == IO.ItemExt_PaperdollAppearance.Left
+                    ? IO.ItemExt_PaperdollAppearance.Right
+                    : IO.ItemExt_PaperdollAppearance.Left;
+
+                conflict = World.Player.FindItemByHand(otherHand);
+
+                if (conflict != null && conflict.RequiredHands == IO.ItemExt_RequiredHands.Two)
+                {
+                    _equipConflicts.Add(conflict);
+                }
+            }
+            else if (item.RequiredHands == IO.ItemExt_RequiredHands.Two)
+            {
+                var conflict = World.Player.FindItemByHand(IO.ItemExt_PaperdollAppearance.Left);
+
+                if (conflict != null)
+                {
+                    _equipConflicts.Add(conflict);
+                }
+
+                conflict = World.Player.FindItemByHand(IO.ItemExt_PaperdollAppearance.Right);
+
+                if (conflict != null)
+                {
+                    _equipConflicts.Add(conflict);
+                }
+            }
+
+            foreach (var conflict in _equipConflicts)
+            {
+                Client.Game.GetScene<GameScene>().QueueDressAction(() =>
+                {
+                    Unequip(conflict);
+                });
+            }
+
+            Client.Game.GetScene<GameScene>().QueueDressAction(() =>
+            {
+                PickUp(item, 0, 0, 1);
+                ItemHold.Clear();
+                ItemHold.Set(item, item.Amount);
+                Equip();
+            });
+        }
+
         public static void Equip(uint container = 0)
         {
             if (ItemHold.Enabled && !ItemHold.IsFixedPosition && ItemHold.ItemData.IsWearable)

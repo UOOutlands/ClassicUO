@@ -91,7 +91,7 @@ namespace ClassicUO.Game.Scripting
             Interpreter.RegisterCommandHandler("rename", Rename);
             Interpreter.RegisterCommandHandler("shownames", ShowNames);
             Interpreter.RegisterCommandHandler("togglehands", ToggleHands);
-            //Interpreter.RegisterCommandHandler("equipitem", EquipItem);
+            Interpreter.RegisterCommandHandler("equipitem", EquipItem);
             //Interpreter.RegisterCommandHandler("dress", DressCommand);
             //Interpreter.RegisterCommandHandler("undress", UnDressCommand);
             //Interpreter.RegisterCommandHandler("dressconfig", DressConfig);
@@ -809,18 +809,22 @@ namespace ClassicUO.Game.Scripting
             return true;
         }
 
-        //public static bool EquipItem(string command, Argument[] args, bool quiet, bool force)
-        //{
-        //    if (args.Length < 2)
-        //        throw new RunTimeError(null, "Usage: equipitem (serial) (layer)");
+        public static bool EquipItem(string command, Argument[] args, bool quiet, bool force)
+        {
+            if (args.Length < 1)
+            {
+                throw new RunTimeError(null, "Usage: equipitem (serial)");
+            }
 
-        //    Item equip = World.FindItem(args[0].AsSerial());
-        //    byte layer = (byte)Utility.ToInt32(args[1].AsString(), 0);
-        //    if (equip != null && (Layer)layer != Layer.Invalid)
-        //        Dress.Equip(equip, (Layer)layer);
+            var item = (Item)World.Get(args[0].AsSerial());
 
-        //    return true;
-        //}
+            if (item != null)
+            {
+                GameActions.Equip(item);
+            }
+
+            return true;
+        }
 
         //public static bool ToggleScavenger(string command, Argument[] args, bool quiet, bool force)
         //{
