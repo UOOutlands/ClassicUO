@@ -647,7 +647,14 @@ namespace ClassicUO.Game
             DropItem(equippedItem, 0xFFFF, 0xFFFF, 0, backpack);
         }
 
-        public static void AllNames()
+        public enum AllNamesTargets
+        {
+            All,
+            Mobiles,
+            Corpses,
+        }
+
+        public static void AllMobileNames()
         {
             foreach (Mobile mobile in World.Mobiles)
             {
@@ -656,13 +663,38 @@ namespace ClassicUO.Game
                     Socket.Send(new PClickRequest(mobile));
                 }
             }
+        }
 
+        public static void AllCorpseNames()
+        {
             foreach (Item item in World.Items)
             {
                 if (item.IsCorpse)
                 {
                     Socket.Send(new PClickRequest(item));
                 }
+            }
+        }
+
+        public static void AllNames()
+        {
+            AllNames(AllNamesTargets.All);
+        }
+
+        public static void AllNames(AllNamesTargets targets)
+        {
+            switch (targets)
+            {
+                case AllNamesTargets.Mobiles:
+                    AllMobileNames();
+                    break;
+                case AllNamesTargets.Corpses:
+                    AllCorpseNames();
+                    break;
+                default:
+                    AllMobileNames();
+                    AllCorpseNames();
+                    break;
             }
         }
 
