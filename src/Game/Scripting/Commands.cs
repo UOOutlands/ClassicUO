@@ -89,7 +89,7 @@ namespace ClassicUO.Game.Scripting
             Interpreter.RegisterCommandHandler("turn", Turn);
             //Interpreter.RegisterCommandHandler("feed", Feed);
             Interpreter.RegisterCommandHandler("rename", Rename);
-            //Interpreter.RegisterCommandHandler("shownames", ShowNames);
+            Interpreter.RegisterCommandHandler("shownames", ShowNames);
             //Interpreter.RegisterCommandHandler("togglehands", ToggleHands);
             //Interpreter.RegisterCommandHandler("equipitem", EquipItem);
             //Interpreter.RegisterCommandHandler("dress", DressCommand);
@@ -747,6 +747,22 @@ namespace ClassicUO.Game.Scripting
 
         //    return true;
         //}
+
+        private static bool ShowNames(string command, Argument[] args, bool quiet, bool force)
+        {
+            if (args.Length == 0)
+                throw new RunTimeError(null, "Usage: shownames ['mobiles'/'corpses']");
+
+            if (args[0].AsString() == "mobiles")
+            {
+                GameActions.AllNames(GameActions.AllNamesTargets.Mobiles);
+            }
+            else if (args[0].AsString() == "corpses")
+            {
+                GameActions.AllNames(GameActions.AllNamesTargets.Corpses);
+            }
+            return true;
+        }
 
         //private static bool ShowNames(string command, Argument[] args, bool quiet, bool force)
         //{
