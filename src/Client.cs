@@ -53,7 +53,7 @@ namespace ClassicUO
             Log.Trace("Running game...");
 
             using (Game = new GameController())
-                //Game = new GameController();
+            //Game = new GameController();
             {
                 // https://github.com/FNA-XNA/FNA/wiki/7:-FNA-Environment-Variables#fna_graphics_enable_highdpi
                 CUOEnviroment.IsHighDPI = Environment.GetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI") == "1";
@@ -166,6 +166,7 @@ namespace ClassicUO
             // ok now load uo files
             UOFileManager.Load();
             StaticFilters.Load();
+            ItemDataExtensions.Load();
 
             Log.Trace("Network calibration...");
             PacketHandlers.Load();
@@ -179,10 +180,10 @@ namespace ClassicUO
                 EncryptionHelper.CalculateEncryption(Version);
                 Log.Trace($"encryption: {EncryptionHelper.Type}");
 
-                if (EncryptionHelper.Type != (ENCRYPTION_TYPE) Settings.GlobalSettings.Encryption)
+                if (EncryptionHelper.Type != (ENCRYPTION_TYPE)Settings.GlobalSettings.Encryption)
                 {
                     Log.Warn($"Encryption found: {EncryptionHelper.Type}");
-                    Settings.GlobalSettings.Encryption = (byte) EncryptionHelper.Type;
+                    Settings.GlobalSettings.Encryption = (byte)EncryptionHelper.Type;
                 }
             }
 

@@ -26,8 +26,17 @@ namespace ClassicUO.Game.Data
     internal enum Layer : byte
     {
         Invalid = 0x00,
-        OneHanded = 0x01,
-        TwoHanded = 0x02,
+
+        // --
+        // Layers cannot represent properly the handedness, that is 1H/2H, of items
+        // and because the graphics flip hands based on direction, they also cannot represent
+        // Left/Right hand properly. These are just virtual hand slots. If you're facing one way, it could mean
+        // "Right", facing another it could mean "Left" - if you have a 1H or 2H weapon equipped; well for rendering
+        // purposes it might be in one or the other slots. For example shields were previously considered "2H" items.
+        HeldInHand1 = 0x01,
+        HeldInHand2 = 0x02,
+        // --
+
         Shoes = 0x03,
         Pants = 0x04,
         Shirt = 0x05,

@@ -89,9 +89,9 @@ namespace ClassicUO.Game.Scripting
             Interpreter.RegisterCommandHandler("turn", Turn);
             //Interpreter.RegisterCommandHandler("feed", Feed);
             Interpreter.RegisterCommandHandler("rename", Rename);
-            //Interpreter.RegisterCommandHandler("shownames", ShowNames);
-            //Interpreter.RegisterCommandHandler("togglehands", ToggleHands);
-            //Interpreter.RegisterCommandHandler("equipitem", EquipItem);
+            Interpreter.RegisterCommandHandler("shownames", ShowNames);
+            Interpreter.RegisterCommandHandler("togglehands", ToggleHands);
+            Interpreter.RegisterCommandHandler("equipitem", EquipItem);
             //Interpreter.RegisterCommandHandler("dress", DressCommand);
             //Interpreter.RegisterCommandHandler("undress", UnDressCommand);
             //Interpreter.RegisterCommandHandler("dressconfig", DressConfig);
@@ -232,7 +232,9 @@ namespace ClassicUO.Game.Scripting
             var ability = args[0].AsString();
 
             if (args.Length < 1 || !abilities.Contains(ability))
+            {
                 throw new RunTimeError(null, "Usage: setability ('primary'/'secondary'/'stun'/'disarm') ['on'/'off']");
+            }
 
             if (args.Length == 2 && args[1].AsString() == "on" || args.Length == 1)
             {
@@ -277,18 +279,18 @@ namespace ClassicUO.Game.Scripting
             if (args.Length == 0 || !hands.Contains(args[0].AsString()))
                 throw new RunTimeError(null, "Usage: clearhands ('left'/'right'/'both')");
 
-            switch (args[0].AsString())
+            switch (args[0].AsString().ToLower())
             {
                 case "left":
-                    GameActions.Unequip(Layer.OneHanded);
+                    GameActions.ClearEquipped(IO.ItemExt_PaperdollAppearance.Left);
                     break;
                 case "right":
-                    GameActions.Unequip(Layer.TwoHanded);
+                    GameActions.ClearEquipped(IO.ItemExt_PaperdollAppearance.Right);
                     break;
                 // case "both":
                 default:
-                    GameActions.Unequip(Layer.OneHanded);
-                    GameActions.Unequip(Layer.TwoHanded);
+                    GameActions.ClearEquipped(IO.ItemExt_PaperdollAppearance.Left);
+                    GameActions.ClearEquipped(IO.ItemExt_PaperdollAppearance.Right);
                     break;
             }
 
@@ -748,53 +750,81 @@ namespace ClassicUO.Game.Scripting
         //    return true;
         //}
 
-        //private static bool ShowNames(string command, Argument[] args, bool quiet, bool force)
-        //{
-        //    if (args.Length == 0 || args[0].AsString() == "mobiles")
-        //    {
-        //        foreach (Mobile m in World.MobilesInRange())
-        //        {
-        //            if (m != World.Player)
-        //                Client.Instance.SendToServer(new SingleClick(m));
-        //        }
-        //    }
-        //    else if (args[0].AsString() == "corpses")
-        //    {
-        //        foreach (Item i in World.Items.Values)
-        //        {
-        //            if (i.IsCorpse)
-        //                Client.Instance.SendToServer(new SingleClick(i));
-        //        }
-        //    }
+        private static bool ShowNames(string command, Argument[] args, bool quiet, bool force)
+        {
+            if (args.Length == 0)
+            {
+                throw new RunTimeError(null, "Usage: shownames ('mobiles'/'corpses')");
+            }
 
-        //    return true;
-        //}
+            var category = args[0].AsString();
 
-        //public static bool ToggleHands(string command, Argument[] args, bool quiet, bool force)
-        //{
-        //    if (args.Length == 0)
-        //        throw new RunTimeError(null, "Usage: togglehands ('left'/'right')");
+            switch (category?.ToLower())
+            {
+                case "mobiles":
+                    {
+                        foreach (var mobile in World.Mobiles)
+                        {
+                            GameActions.SingleClick(mobile.Serial);
+                        }
+                    }
+                    break;
+                case "corpses":
+                    {
+                        foreach (var item in World.Items)
+                        {
+                            if (item.IsCorpse)
+                            {
+                                GameActions.SingleClick(item.Serial);
+                            }
+                        }
+                    }
+                    break;
+                default:
+                    throw new RunTimeError(null, "Usage: shownames ('mobiles'/'corpses')");
+            }
 
-        //    if (args[0].AsString() == "left")
-        //        Dress.ToggleLeft();
-        //    else
-        //        Dress.ToggleRight();
+            return true;
+        }
 
-        //    return true;
-        //}
+        public static bool ToggleHands(string command, Argument[] args, bool quiet, bool force)
+        {
+            if (args.Length == 0)
+            {
+                throw new RunTimeError(null, "Usage: togglehands ('left'/'right')");
+            }
 
-        //public static bool EquipItem(string command, Argument[] args, bool quiet, bool force)
-        //{
-        //    if (args.Length < 2)
-        //        throw new RunTimeError(null, "Usage: equipitem (serial) (layer)");
+            switch (args[0].AsString().ToLower())
+            {
+                case "left":
+                    GameActions.ToggleEquip(IO.ItemExt_PaperdollAppearance.Left);
+                    break;
+                case "right":
+                    GameActions.ToggleEquip(IO.ItemExt_PaperdollAppearance.Right);
+                    break;
+                default:
+                    throw new RunTimeError(null, "Usage: togglehands ('left'/'right')");
+            }
 
-        //    Item equip = World.FindItem(args[0].AsSerial());
-        //    byte layer = (byte)Utility.ToInt32(args[1].AsString(), 0);
-        //    if (equip != null && (Layer)layer != Layer.Invalid)
-        //        Dress.Equip(equip, (Layer)layer);
+            return true;
+        }
 
-        //    return true;
-        //}
+        public static bool EquipItem(string command, Argument[] args, bool quiet, bool force)
+        {
+            if (args.Length < 1)
+            {
+                throw new RunTimeError(null, "Usage: equipitem (serial)");
+            }
+
+            var item = (Item)World.Get(args[0].AsSerial());
+
+            if (item != null)
+            {
+                GameActions.Equip(item);
+            }
+
+            return true;
+        }
 
         //public static bool ToggleScavenger(string command, Argument[] args, bool quiet, bool force)
         //{

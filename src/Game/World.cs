@@ -218,7 +218,7 @@ namespace ClassicUO.Game
 
                         RemoveItem(rem, true);
 
-                        if (rem.Layer == Layer.OneHanded || rem.Layer == Layer.TwoHanded)
+                        if (rem.Layer == Layer.HeldInHand1 || rem.Layer == Layer.HeldInHand2)
                         {
                             Player.UpdateAbilities();
                         }

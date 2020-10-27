@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
@@ -113,12 +113,12 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (Amount > 5)
                     {
-                        return (ushort) (Graphic + 2);
+                        return (ushort)(Graphic + 2);
                     }
 
                     if (Amount > 1)
                     {
-                        return (ushort) (Graphic + 1);
+                        return (ushort)(Graphic + 1);
                     }
                 }
                 else if (IsMulti)
@@ -178,9 +178,11 @@ namespace ClassicUO.Game.GameObjects
 
         public ref StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[IsMulti ? MultiGraphic : Graphic];
 
+        public Layer StaticLayer => (Layer)ItemData.Layer;
+
         public bool IsLootable =>
-            ItemData.Layer != (int) Layer.Hair && ItemData.Layer != (int) Layer.Beard &&
-            ItemData.Layer != (int) Layer.Face && Graphic != 0;
+            ItemData.Layer != (int)Layer.Hair && ItemData.Layer != (int)Layer.Beard &&
+            ItemData.Layer != (int)Layer.Face && Graphic != 0;
 
         public ushort Amount;
         public uint Container = 0xFFFF_FFFF;
@@ -188,6 +190,36 @@ namespace ClassicUO.Game.GameObjects
         public bool IsDamageable;
         public Layer Layer;
         public byte LightID;
+
+        ItemExt? _itemExt;
+
+        public ItemExt_PaperdollAppearance PaperdollAppearance
+        {
+            get
+            {
+                if (_itemExt == null)
+                {
+                    ItemDataExtensions.TryGetValue(Graphic, out var value);
+                    _itemExt = value;
+                }
+
+                return _itemExt.Value.PaperdollAppearance;
+            }
+        }
+
+        public ItemExt_RequiredHands RequiredHands
+        {
+            get
+            {
+                if (_itemExt == null)
+                {
+                    ItemDataExtensions.TryGetValue(Graphic, out var value);
+                    _itemExt = value;
+                }
+
+                return _itemExt.Value.RequiredHands;
+            }
+        }
 
         public Rectangle? MultiInfo;
         public bool Opened;
@@ -271,23 +303,23 @@ namespace ClassicUO.Game.GameObjects
 
                     ZLib.Decompress
                     (
-                        MultiLoader.Instance.File.PositionAddress, entry.Length, 0, (IntPtr) data,
+                        MultiLoader.Instance.File.PositionAddress, entry.Length, 0, (IntPtr)data,
                         entry.DecompressedLength
                     );
 
                     _reader.SetData(data, entry.DecompressedLength);
                     _reader.Skip(4);
-                    int count = (int) _reader.ReadUInt();
+                    int count = (int)_reader.ReadUInt();
 
                     int sizeOf = sizeof(MultiBlockNew);
 
                     for (int i = 0; i < count; i++)
                     {
-                        MultiBlockNew* block = (MultiBlockNew*) (_reader.PositionAddress + i * sizeOf);
+                        MultiBlockNew* block = (MultiBlockNew*)(_reader.PositionAddress + i * sizeOf);
 
                         if (block->Unknown != 0)
                         {
-                            _reader.Skip((int) (block->Unknown * 4));
+                            _reader.Skip((int)(block->Unknown * 4));
                         }
 
                         if (block->X < minX)
@@ -313,9 +345,9 @@ namespace ClassicUO.Game.GameObjects
                         if (block->Flags == 0 || block->Flags == 0x100)
                         {
                             Multi m = Multi.Create(block->ID);
-                            m.X = (ushort) (X + block->X);
-                            m.Y = (ushort) (Y + block->Y);
-                            m.Z = (sbyte) (Z + block->Z);
+                            m.X = (ushort)(X + block->X);
+                            m.Y = (ushort)(Y + block->Y);
+                            m.Z = (sbyte)(Z + block->Z);
                             m.UpdateScreenPosition();
                             m.MultiOffsetX = block->X;
                             m.MultiOffsetY = block->Y;
@@ -348,7 +380,7 @@ namespace ClassicUO.Game.GameObjects
                 for (int i = 0; i < count; i++)
                 {
                     MultiBlock* block =
-                        (MultiBlock*) (MultiLoader.Instance.File.PositionAddress + i * MultiLoader.Instance.Offset);
+                        (MultiBlock*)(MultiLoader.Instance.File.PositionAddress + i * MultiLoader.Instance.Offset);
 
                     if (block->X < minX)
                     {
@@ -373,9 +405,9 @@ namespace ClassicUO.Game.GameObjects
                     if (block->Flags != 0)
                     {
                         Multi m = Multi.Create(block->ID);
-                        m.X = (ushort) (X + block->X);
-                        m.Y = (ushort) (Y + block->Y);
-                        m.Z = (sbyte) (Z + block->Z);
+                        m.X = (ushort)(X + block->X);
+                        m.Y = (ushort)(Y + block->Y);
+                        m.Z = (sbyte)(Z + block->Z);
                         m.UpdateScreenPosition();
                         m.MultiOffsetX = block->X;
                         m.MultiOffsetY = block->Y;
@@ -431,20 +463,20 @@ namespace ClassicUO.Game.GameObjects
                     if ((Direction & Direction.Running) != 0)
                     {
                         UsedLayer = true;
-                        Direction &= (Direction) 0x7F;
+                        Direction &= (Direction)0x7F;
                     }
                     else
                     {
                         UsedLayer = false;
                     }
 
-                    Layer = (Layer) Direction;
+                    Layer = (Layer)Direction;
                     AllowedToDraw = true;
                 }
             }
             else if (WantUpdateMulti)
             {
-                UoAssist.SignalAddMulti((ushort) (Graphic | 0x4000), X, Y);
+                UoAssist.SignalAddMulti((ushort)(Graphic | 0x4000), X, Y);
 
                 if (MultiDistanceBonus == 0 || World.HouseManager.IsHouseInRange(Serial, World.ClientViewRange))
                 {
@@ -476,442 +508,442 @@ namespace ClassicUO.Game.GameObjects
                 {
                     case 0x3E90: // 16016 Reptalon
 
-                    {
-                        graphic = 0x0114;
+                        {
+                            graphic = 0x0114;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3E91: // 16017
 
-                    {
-                        graphic = 0x0115;
+                        {
+                            graphic = 0x0115;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3E92: // 16018
 
-                    {
-                        graphic = 0x011C;
+                        {
+                            graphic = 0x011C;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3E94: // 16020
 
-                    {
-                        graphic = 0x00F3;
+                        {
+                            graphic = 0x00F3;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3E95: // 16021
 
-                    {
-                        graphic = 0x00A9;
+                        {
+                            graphic = 0x00A9;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3E97: // 16023 Ethereal Giant Beetle
 
-                    {
-                        graphic = 0x00C3;
+                        {
+                            graphic = 0x00C3;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3E98: // 16024 Ethereal Swamp Dragon
 
-                    {
-                        graphic = 0x00C2;
+                        {
+                            graphic = 0x00C2;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3E9A: // 16026 Ethereal Ridgeback
 
-                    {
-                        graphic = 0x00C1;
+                        {
+                            graphic = 0x00C1;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3E9B: // 16027
                     case 0x3E9D: // 16029 Ethereal Unicorn
 
-                    {
-                        return 0x00C0;
-                    }
+                        {
+                            return 0x00C0;
+                        }
 
                     case 0x3E9C: // 16028 Ethereal Kirin
 
-                    {
-                        graphic = 0x00BF;
+                        {
+                            graphic = 0x00BF;
 
-                        return graphic;
-                    }
+                            return graphic;
+                        }
 
                     case 0x3E9E: // 16030
 
-                    {
-                        graphic = 0x00BE;
+                        {
+                            graphic = 0x00BE;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EA0: // 16032 light grey/horse3
 
-                    {
-                        graphic = 0x00E2;
+                        {
+                            graphic = 0x00E2;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EA1: // 16033 greybrown/horse4
 
-                    {
-                        graphic = 0x00E4;
+                        {
+                            graphic = 0x00E4;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EA2: // 16034 dark brown/horse
 
-                    {
-                        graphic = 0x00CC;
+                        {
+                            graphic = 0x00CC;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EA3: // 16035 desert ostard
 
-                    {
-                        graphic = 0x00D2;
+                        {
+                            graphic = 0x00D2;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EA4: // 16036 frenzied ostard (=zostrich)
 
-                    {
-                        graphic = 0x00DA;
+                        {
+                            graphic = 0x00DA;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EA5: // 16037 forest ostard
 
-                    {
-                        graphic = 0x00DB;
+                        {
+                            graphic = 0x00DB;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EA6: // 16038 Llama
 
-                    {
-                        graphic = 0x00DC;
+                        {
+                            graphic = 0x00DC;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EA7: // 16039 Nightmare / Vortex
 
-                    {
-                        graphic = 0x0074;
+                        {
+                            graphic = 0x0074;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EA8: // 16040 Silver Steed
 
-                    {
-                        graphic = 0x0075;
+                        {
+                            graphic = 0x0075;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EA9: // 16041 Nightmare
 
-                    {
-                        graphic = 0x0072;
+                        {
+                            graphic = 0x0072;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EAA: // 16042 Ethereal Horse
 
-                    {
-                        graphic = 0x0073;
+                        {
+                            graphic = 0x0073;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EAB: // 16043 Ethereal Llama
 
-                    {
-                        graphic = 0x00AA;
+                        {
+                            graphic = 0x00AA;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EAC: // 16044 Ethereal Ostard
 
-                    {
-                        graphic = 0x00AB;
+                        {
+                            graphic = 0x00AB;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EAD: // 16045 Kirin
 
-                    {
-                        graphic = 0x0084;
+                        {
+                            graphic = 0x0084;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EAF: // 16047 War Horse (Blood Red)
 
-                    {
-                        graphic = 0x0078;
+                        {
+                            graphic = 0x0078;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EB0: // 16048 War Horse (Light Green)
 
-                    {
-                        graphic = 0x0079;
+                        {
+                            graphic = 0x0079;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EB1: // 16049 War Horse (Light Blue)
 
-                    {
-                        graphic = 0x0077;
+                        {
+                            graphic = 0x0077;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EB2: // 16050 War Horse (Purple)
 
-                    {
-                        graphic = 0x0076;
+                        {
+                            graphic = 0x0076;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EB3: // 16051 Sea Horse (Medium Blue)
 
-                    {
-                        graphic = 0x0090;
+                        {
+                            graphic = 0x0090;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EB4: // 16052 Unicorn
 
-                    {
-                        graphic = 0x007A;
+                        {
+                            graphic = 0x007A;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EB5: // 16053 Nightmare
 
-                    {
-                        graphic = 0x00B1;
+                        {
+                            graphic = 0x00B1;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EB6: // 16054 Nightmare 4
 
-                    {
-                        graphic = 0x00B2;
+                        {
+                            graphic = 0x00B2;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EB7: // 16055 Dark Steed
 
-                    {
-                        graphic = 0x00B3;
+                        {
+                            graphic = 0x00B3;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EB8: // 16056 Ridgeback
 
-                    {
-                        graphic = 0x00BC;
+                        {
+                            graphic = 0x00BC;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EBA: // 16058 Ridgeback, Savage
 
-                    {
-                        graphic = 0x00BB;
+                        {
+                            graphic = 0x00BB;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EBB: // 16059 Skeletal Mount
 
-                    {
-                        graphic = 0x0319;
+                        {
+                            graphic = 0x0319;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EBC: // 16060 Beetle
 
-                    {
-                        graphic = 0x0317;
+                        {
+                            graphic = 0x0317;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EBD: // 16061 SwampDragon
 
-                    {
-                        graphic = 0x031A;
+                        {
+                            graphic = 0x031A;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EBE: // 16062 Armored Swamp Dragon
 
-                    {
-                        graphic = 0x031F;
+                        {
+                            graphic = 0x031F;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EC3: //16067 Beetle
 
-                    {
-                        graphic = 0x02D4;
+                        {
+                            graphic = 0x02D4;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3ECE: // serpentine dragon
-                    {
-                        graphic = 0x059A;
+                        {
+                            graphic = 0x059A;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EC5: // 16069
                     case 0x3F3A: // 16186 snow bear ???
 
-                    {
-                        graphic = 0x00D5;
+                        {
+                            graphic = 0x00D5;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EC6: // 16070 Boura
 
-                    {
-                        graphic = 0x01B0;
+                        {
+                            graphic = 0x01B0;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EC7: // 16071 Tiger
 
-                    {
-                        graphic = 0x04E6;
+                        {
+                            graphic = 0x04E6;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EC8: // 16072 Tiger
 
-                    {
-                        graphic = 0x04E7;
+                        {
+                            graphic = 0x04E7;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3EC9: // 16073
 
-                    {
-                        graphic = 0x042D;
+                        {
+                            graphic = 0x042D;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3ECA: // tarantula
 
-                    {
-                        graphic = 0x0579;
+                        {
+                            graphic = 0x0579;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3ECC:
-                    {
-                        graphic = 0x0582;
+                        {
+                            graphic = 0x0582;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3ED1: // CoconutCrab
-                    {
-                        graphic = 0x05E6;
+                        {
+                            graphic = 0x05E6;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3ECB: // Lasher
-                    {
-                        graphic = 0x057F;
+                        {
+                            graphic = 0x057F;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3ED0: //SkeletalCat
-                    {
-                        graphic = 0x05A1;
+                        {
+                            graphic = 0x05A1;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3ED2: // war boar
-                    {
-                        graphic = 0x05F6;
+                        {
+                            graphic = 0x05F6;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3ECD: //Palomino
-                    {
-                        graphic = 0x0580;
+                        {
+                            graphic = 0x0580;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3ECF: //Eowmu
-                    {
-                        graphic = 0x05A0;
+                        {
+                            graphic = 0x05A0;
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 0x3ED3: // capybara
-                    {
-                        graphic = 0x05F7;
+                        {
+                            graphic = 0x05F7;
 
-                        break;
-                    }
+                            break;
+                        }
                 }
 
                 if (ItemData.AnimID != 0)
@@ -937,11 +969,11 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            TextObject last = (TextObject) TextContainer.Items;
+            TextObject last = (TextObject)TextContainer.Items;
 
             while (last?.Next != null)
             {
-                last = (TextObject) last.Next;
+                last = (TextObject)last.Next;
             }
 
             if (last == null)
@@ -962,12 +994,12 @@ namespace ClassicUO.Game.GameObjects
                     p.Y -= texture.ImageRectangle.Height >> 1;
                 }
 
-                p.X += (int) Offset.X + 22;
-                p.Y += (int) (Offset.Y - Offset.Z) + 22;
+                p.X += (int)Offset.X + 22;
+                p.Y += (int)(Offset.Y - Offset.Z) + 22;
 
                 p = Client.Game.Scene.Camera.WorldToScreen(p);
 
-                for (; last != null; last = (TextObject) last.Previous)
+                for (; last != null; last = (TextObject)last.Previous)
                 {
                     if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
                     {
@@ -988,7 +1020,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                for (; last != null; last = (TextObject) last.Previous)
+                for (; last != null; last = (TextObject)last.Previous)
                 {
                     if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
                     {
@@ -1013,11 +1045,11 @@ namespace ClassicUO.Game.GameObjects
 
             if (IsCorpse)
             {
-                dir = (byte) Layer;
+                dir = (byte)Layer;
 
                 if (LastAnimationChangeTime < Time.Ticks)
                 {
-                    sbyte frameIndex = (sbyte) (AnimIndex + 1);
+                    sbyte frameIndex = (sbyte)(AnimIndex + 1);
                     ushort id = GetGraphicForAnimation();
 
                     //FileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref newHue);
@@ -1056,7 +1088,7 @@ namespace ClassicUO.Game.GameObjects
 
                             if (frameIndex >= fc)
                             {
-                                frameIndex = (sbyte) (fc - 1);
+                                frameIndex = (sbyte)(fc - 1);
                             }
 
                             AnimIndex = frameIndex;
