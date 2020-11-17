@@ -45,9 +45,9 @@ namespace ClassicUO.Game.Managers
                     CUOEnviroment.ExecutablePath,
                     "Data",
                     "Profiles",
-                    ProfileManager.Current.Username,
-                    ProfileManager.Current.ServerName,
-                    ProfileManager.Current.CharacterName,
+                    ProfileManager.CurrentProfile.Username,
+                    ProfileManager.CurrentProfile.ServerName,
+                    ProfileManager.CurrentProfile.CharacterName,
                     "Scripts");
             }
         }

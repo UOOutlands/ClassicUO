@@ -461,11 +461,11 @@ namespace ClassicUO.Game.Scripting
                 return false;
             }
 
-            var movementDelay = ProfileManager.Current.AlwaysRun ? runMs : walkMs;
+            var movementDelay = ProfileManager.CurrentProfile.AlwaysRun ? runMs : walkMs;
 
             if (World.Player.FindItemByLayer(Layer.Mount) != null)
             {
-                if (ProfileManager.Current.AlwaysRun)
+                if (ProfileManager.CurrentProfile.AlwaysRun)
                 {
                     movementDelay = mountedRunMs;
                 }
@@ -477,7 +477,7 @@ namespace ClassicUO.Game.Scripting
 
             movementCooldown = DateTime.UtcNow + movementDelay;
 
-            return World.Player.Walk(dir, ProfileManager.Current.AlwaysRun);
+            return World.Player.Walk(dir, ProfileManager.CurrentProfile.AlwaysRun);
         }
 
         private static bool Turn(string command, Argument[] args, bool quiet, bool force)
