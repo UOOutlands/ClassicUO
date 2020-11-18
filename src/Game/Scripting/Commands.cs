@@ -96,8 +96,8 @@ namespace ClassicUO.Game.Scripting
             //Interpreter.RegisterCommandHandler("undress", UnDressCommand);
             //Interpreter.RegisterCommandHandler("dressconfig", DressConfig);
             //Interpreter.RegisterCommandHandler("togglescavenger", ToggleScavenger);
-            //Interpreter.RegisterCommandHandler("unsetalias", UnsetAlias);
-            //Interpreter.RegisterCommandHandler("setalias", SetAlias);
+            Interpreter.RegisterCommandHandler("unsetalias", UnsetAlias);
+            Interpreter.RegisterCommandHandler("setalias", SetAlias);
             //Interpreter.RegisterCommandHandler("promptalias", PromptAlias);
             //Interpreter.RegisterCommandHandler("waitforgump", WaitForGump);
             //Interpreter.RegisterCommandHandler("clearjournal", ClearJournal);
@@ -738,15 +738,15 @@ namespace ClassicUO.Game.Scripting
         //    return true;
         //}
 
-        //private static bool UnsetAlias(string command, Argument[] args, bool quiet, bool force)
-        //{
-        //    if (args.Length == 0)
-        //        throw new RunTimeError(null, "Usage: unsetalias (string)");
+        private static bool UnsetAlias(string command, Argument[] args, bool quiet, bool force)
+        {
+            if (args.Length == 0)
+                throw new RunTimeError(null, "Usage: unsetalias (string)");
 
-        //    Interpreter.SetAlias(args[0].AsString(), 0);
+            Interpreter.SetAlias(args[0].AsString(), 0);
 
-        //    return true;
-        //}
+            return true;
+        }
 
         //private static bool ShowNames(string command, Argument[] args, bool quiet, bool force)
         //{
