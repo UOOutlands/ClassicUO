@@ -587,15 +587,15 @@ namespace ClassicUO.Game.Scripting
             return true;
         }
 
-        //private static bool SetAlias(string command, Argument[] args, bool quiet, bool force)
-        //{
-        //    if (args.Length != 2)
-        //        throw new RunTimeError(null, "Usage: setalias ('name') [serial]");
+        private static bool SetAlias(string command, Argument[] args, bool quiet, bool force)
+        {
+            if (args.Length != 2)
+                throw new RunTimeError(null, "Usage: setalias ('name') [serial]");
 
-        //    Interpreter.SetAlias(args[0].AsString(), args[1].AsSerial());
+            Interpreter.SetAlias(args[0].AsString(), args[1].AsSerial());
 
-        //    return true;
-        //}
+            return true;
+        }
 
         //private static bool PromptAlias(string command, Argument[] args, bool quiet, bool force)
         //{
