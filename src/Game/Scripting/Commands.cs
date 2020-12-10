@@ -102,17 +102,17 @@ namespace ClassicUO.Game.Scripting
             //Interpreter.RegisterCommandHandler("waitforgump", WaitForGump);
             //Interpreter.RegisterCommandHandler("clearjournal", ClearJournal);
             //Interpreter.RegisterCommandHandler("waitforjournal", WaitForJournal);
-            //Interpreter.RegisterCommandHandler("poplist", PopList);
-            //Interpreter.RegisterCommandHandler("pushlist", PushList);
-            //Interpreter.RegisterCommandHandler("removelist", RemoveList);
-            //Interpreter.RegisterCommandHandler("createlist", CreateList);
-            //Interpreter.RegisterCommandHandler("clearlist", ClearList);
+            Interpreter.RegisterCommandHandler("poplist", PopList);
+            Interpreter.RegisterCommandHandler("pushlist", PushList);
+            Interpreter.RegisterCommandHandler("removelist", RemoveList);
+            Interpreter.RegisterCommandHandler("createlist", CreateList);
+            Interpreter.RegisterCommandHandler("clearlist", ClearList);
             //Interpreter.RegisterCommandHandler("ping", Ping);
             //Interpreter.RegisterCommandHandler("resync", Resync);
             //Interpreter.RegisterCommandHandler("messagebox", MessageBox);
-            //Interpreter.RegisterCommandHandler("paperdoll", Paperdoll);
+            Interpreter.RegisterCommandHandler("paperdoll", Paperdoll);
             //Interpreter.RegisterCommandHandler("headmsg", HeadMsg);
-            //Interpreter.RegisterCommandHandler("sysmsg", SysMsg);
+            Interpreter.RegisterCommandHandler("sysmsg", SysMsg);
             //Interpreter.RegisterCommandHandler("cast", Cast);
             //Interpreter.RegisterCommandHandler("waitfortarget", WaitForTarget);
             //Interpreter.RegisterCommandHandler("canceltarget", CancelTarget);
@@ -122,9 +122,9 @@ namespace ClassicUO.Game.Scripting
             //Interpreter.RegisterCommandHandler("targettile", TargetTile);
             //Interpreter.RegisterCommandHandler("targettileoffset", TargetTileOffset);
             //Interpreter.RegisterCommandHandler("targettilerelative", TargetTileRelative);
-            //Interpreter.RegisterCommandHandler("settimer", SetTimer);
-            //Interpreter.RegisterCommandHandler("removetimer", RemoveTimer);
-            //Interpreter.RegisterCommandHandler("createtimer", CreateTimer);
+            Interpreter.RegisterCommandHandler("settimer", SetTimer);
+            Interpreter.RegisterCommandHandler("removetimer", RemoveTimer);
+            Interpreter.RegisterCommandHandler("createtimer", CreateTimer);
 
 
             Interpreter.RegisterCommandHandler("fly", UnimplementedCommand);
@@ -661,82 +661,82 @@ namespace ClassicUO.Game.Scripting
         //    return true;
         //}
 
-        //private static bool PopList(string command, Argument[] args, bool quiet, bool force)
-        //{
-        //    if (args.Length != 2)
-        //        throw new RunTimeError(null, "Usage: poplist ('list name') ('element value'/'front'/'back')");
+        private static bool PopList(string command, Argument[] args, bool quiet, bool force)
+        {
+            if (args.Length != 2)
+                throw new RunTimeError(null, "Usage: poplist ('list name') ('element value'/'front'/'back')");
 
-        //    if (args[1].AsString() == "front")
-        //    {
-        //        if (force)
-        //            while (Interpreter.PopList(args[0].AsString(), true)) { }
-        //        else
-        //            Interpreter.PopList(args[0].AsString(), true);
-        //    }
-        //    else if (args[1].AsString() == "back")
-        //    {
-        //        if (force)
-        //            while (Interpreter.PopList(args[0].AsString(), false)) { }
-        //        else
-        //            Interpreter.PopList(args[0].AsString(), false);
-        //    }
-        //    else
-        //    {
-        //        if (force)
-        //            while (Interpreter.PopList(args[0].AsString(), args[1])) { }
-        //        else
-        //            Interpreter.PopList(args[0].AsString(), args[1]);
-        //    }
+            if (args[1].AsString() == "front")
+            {
+                if (force)
+                    while (Interpreter.PopList(args[0].AsString(), true)) { }
+                else
+                    Interpreter.PopList(args[0].AsString(), true);
+            }
+            else if (args[1].AsString() == "back")
+            {
+                if (force)
+                    while (Interpreter.PopList(args[0].AsString(), false)) { }
+                else
+                    Interpreter.PopList(args[0].AsString(), false);
+            }
+            else
+            {
+                if (force)
+                    while (Interpreter.PopList(args[0].AsString(), args[1])) { }
+                else
+                    Interpreter.PopList(args[0].AsString(), args[1]);
+            }
 
-        //    return true;
-        //}
+            return true;
+        }
 
-        //private static bool PushList(string command, Argument[] args, bool quiet, bool force)
-        //{
-        //    if (args.Length < 2 || args.Length > 3)
-        //        throw new RunTimeError(null, "Usage: pushlist ('list name') ('element value') ['front'/'back']");
+        private static bool PushList(string command, Argument[] args, bool quiet, bool force)
+        {
+            if (args.Length < 2 || args.Length > 3)
+                throw new RunTimeError(null, "Usage: pushlist ('list name') ('element value') ['front'/'back']");
 
-        //    bool front = false;
-        //    if (args.Length == 3)
-        //    {
-        //        if (args[2].AsString() == "front")
-        //            front = true;
-        //    }
+            bool front = false;
+            if (args.Length == 3)
+            {
+                if (args[2].AsString() == "front")
+                    front = true;
+            }
 
-        //    Interpreter.PushList(args[0].AsString(), args[1], front, force);
+            Interpreter.PushList(args[0].AsString(), args[1], front, force);
 
-        //    return true;
-        //}
+            return true;
+        }
 
-        //private static bool RemoveList(string command, Argument[] args, bool quiet, bool force)
-        //{
-        //    if (args.Length != 1)
-        //        throw new RunTimeError(null, "Usage: removelist ('list name')");
+        private static bool RemoveList(string command, Argument[] args, bool quiet, bool force)
+        {
+            if (args.Length != 1)
+                throw new RunTimeError(null, "Usage: removelist ('list name')");
 
-        //    Interpreter.DestroyList(args[0].AsString());
+            Interpreter.DestroyList(args[0].AsString());
 
-        //    return true;
-        //}
+            return true;
+        }
 
-        //private static bool CreateList(string command, Argument[] args, bool quiet, bool force)
-        //{
-        //    if (args.Length != 1)
-        //        throw new RunTimeError(null, "Usage: createlist ('list name')");
+        private static bool CreateList(string command, Argument[] args, bool quiet, bool force)
+        {
+            if (args.Length != 1)
+                throw new RunTimeError(null, "Usage: createlist ('list name')");
 
-        //    Interpreter.CreateList(args[0].AsString());
+            Interpreter.CreateList(args[0].AsString());
 
-        //    return true;
-        //}
+            return true;
+        }
 
-        //private static bool ClearList(string command, Argument[] args, bool quiet, bool force)
-        //{
-        //    if (args.Length != 1)
-        //        throw new RunTimeError(null, "Usage: clearlist ('list name')");
+        private static bool ClearList(string command, Argument[] args, bool quiet, bool force)
+        {
+            if (args.Length != 1)
+                throw new RunTimeError(null, "Usage: clearlist ('list name')");
 
-        //    Interpreter.ClearList(args[0].AsString());
+            Interpreter.ClearList(args[0].AsString());
 
-        //    return true;
-        //}
+            return true;
+        }
 
         private static bool UnsetAlias(string command, Argument[] args, bool quiet, bool force)
         {
@@ -869,16 +869,20 @@ namespace ClassicUO.Game.Scripting
             return true;
         }
 
-        //private static bool Paperdoll(string command, Argument[] args, bool quiet, bool force)
-        //{
-        //    if (args.Length > 1)
-        //        throw new RunTimeError(null, "Usage: paperdoll [serial]");
+        private static bool Paperdoll(string command, Argument[] args, bool quiet, bool force)
+        {
+            if (args.Length > 1)
+                throw new RunTimeError(null, "Usage: paperdoll [serial]");
 
-        //    uint serial = args.Length == 0 ? World.Player.Serial.Value : args[0].AsSerial();
-        //    Client.Instance.SendToServer(new DoubleClick(serial));
+            uint serial = args.Length == 0 ? World.Player.Serial : args[0].AsSerial();
 
-        //    return true;
-        //}
+            var mobile = World.Mobiles.Get(serial);
+
+            if (mobile != null)
+                GameActions.DoubleClick(serial);
+
+            return true;
+        }
 
         //public static bool Cast(string command, Argument[] args, bool quiet, bool force)
         //{
@@ -1165,22 +1169,22 @@ namespace ClassicUO.Game.Scripting
         //    return true;
         //}
 
-        //public static bool SysMsg(string command, Argument[] args, bool quiet, bool force)
-        //{
-        //    switch (args.Length)
-        //    {
-        //        case 1:
-        //            World.Player.SendMessage(Config.GetInt("SysColor"), args[0].AsString());
-        //            break;
-        //        case 2:
-        //            World.Player.SendMessage(args[1].AsInt(), args[0].AsString());
-        //            break;
-        //        default:
-        //            throw new RunTimeError(null, "Usage: sysmsg ('text') [color]");
-        //    }
+        public static bool SysMsg(string command, Argument[] args, bool quiet, bool force)
+        {
+            switch (args.Length)
+            {
+                case 1:
+                    World.Player.AddMessage(MessageType.System, args[0].AsString(), TextType.SYSTEM);
+                    break;
+                case 2:
+                    World.Player.AddMessage(MessageType.System, args[0].AsString(), ProfileManager.CurrentProfile.ChatFont, args[1].AsUShort(), true, TextType.SYSTEM);
+                    break;
+                default:
+                    throw new RunTimeError(null, "Usage: sysmsg ('text') [color]");
+            }
 
-        //    return true;
-        //}
+            return true;
+        }
 
         //public static bool DressCommand(string command, Argument[] args, bool quiet, bool force)
         //{
@@ -1243,32 +1247,32 @@ namespace ClassicUO.Game.Scripting
         //    return true;
         //}
 
-        //private static bool SetTimer(string command, Argument[] args, bool quiet, bool force)
-        //{
-        //    if (args.Length != 2)
-        //        throw new RunTimeError(null, "Usage: settimer (timer name) (value)");
+        private static bool SetTimer(string command, Argument[] args, bool quiet, bool force)
+        {
+            if (args.Length != 2)
+                throw new RunTimeError(null, "Usage: settimer (timer name) (value)");
 
 
-        //    Interpreter.SetTimer(args[0].AsString(), args[1].AsInt());
-        //    return true;
-        //}
+            Interpreter.SetTimer(args[0].AsString(), args[1].AsInt());
+            return true;
+        }
 
-        //private static bool RemoveTimer(string command, Argument[] args, bool quiet, bool force)
-        //{
-        //    if (args.Length != 1)
-        //        throw new RunTimeError(null, "Usage: removetimer (timer name)");
+        private static bool RemoveTimer(string command, Argument[] args, bool quiet, bool force)
+        {
+            if (args.Length != 1)
+                throw new RunTimeError(null, "Usage: removetimer (timer name)");
 
-        //    Interpreter.RemoveTimer(args[0].AsString());
-        //    return true;
-        //}
+            Interpreter.RemoveTimer(args[0].AsString());
+            return true;
+        }
 
-        //private static bool CreateTimer(string command, Argument[] args, bool quiet, bool force)
-        //{
-        //    if (args.Length != 1)
-        //        throw new RunTimeError(null, "Usage: createtimer (timer name)");
+        private static bool CreateTimer(string command, Argument[] args, bool quiet, bool force)
+        {
+            if (args.Length != 1)
+                throw new RunTimeError(null, "Usage: createtimer (timer name)");
 
-        //    Interpreter.CreateTimer(args[0].AsString());
-        //    return true;
-        //}
+            Interpreter.CreateTimer(args[0].AsString());
+            return true;
+        }
     }
 }
