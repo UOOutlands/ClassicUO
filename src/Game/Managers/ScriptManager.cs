@@ -58,6 +58,7 @@ namespace ClassicUO.Game.Managers
         {
             Aliases.Register();
             Commands.Register();
+            Expressions.Register();
         }
 
         public void Load()
