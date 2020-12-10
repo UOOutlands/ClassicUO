@@ -876,7 +876,10 @@ namespace ClassicUO.Game.Scripting
 
             uint serial = args.Length == 0 ? World.Player.Serial : args[0].AsSerial();
 
-            GameActions.DoubleClick(serial);
+            var mobile = World.Mobiles.Get(serial);
+
+            if (mobile != null)
+                GameActions.DoubleClick(serial);
 
             return true;
         }
