@@ -46,7 +46,7 @@ namespace ClassicUO.Game.GameObjects
 {
     internal class PlayerMobile : Mobile
     {
-        private readonly Dictionary<BuffIconType, BuffIcon> _buffIcons = new Dictionary<BuffIconType, BuffIcon>();
+        private readonly Dictionary<ushort, BuffIcon> _buffIcons = new Dictionary<ushort, BuffIcon>();
 
         public PlayerMobile(uint serial) : base(serial)
         {
@@ -63,7 +63,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override bool InWarMode { get; set; }
 
-        public IReadOnlyDictionary<BuffIconType, BuffIcon> BuffIcons => _buffIcons;
+        public IReadOnlyDictionary<ushort, BuffIcon> BuffIcons => _buffIcons;
 
 
         public Ability PrimaryAbility
@@ -249,18 +249,18 @@ namespace ClassicUO.Game.GameObjects
             return found;
         }
 
-        public void AddBuff(BuffIconType type, ushort graphic, uint time, string text)
+        public void AddBuff(ushort graphic, uint time, string text)
         {
-            _buffIcons[type] = new BuffIcon(type, graphic, time, text);
+            _buffIcons[graphic] = new BuffIcon(graphic, time, text);
         }
 
 
-        public bool IsBuffIconExists(BuffIconType graphic)
+        public bool IsBuffIconExists(ushort graphic)
         {
             return _buffIcons.ContainsKey(graphic);
         }
 
-        public void RemoveBuff(BuffIconType graphic)
+        public void RemoveBuff(ushort graphic)
         {
             _buffIcons.Remove(graphic);
         }

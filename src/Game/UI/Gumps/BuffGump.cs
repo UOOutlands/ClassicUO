@@ -138,7 +138,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             );
 
-            foreach (KeyValuePair<BuffIconType, BuffIcon> k in World.Player.BuffIcons)
+            foreach (KeyValuePair<ushort, BuffIcon> k in World.Player.BuffIcons)
             {
                 _box.Add(new BuffControlEntry(World.Player.BuffIcons[k.Key]));
             }

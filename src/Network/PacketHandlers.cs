@@ -5246,81 +5246,73 @@ namespace ClassicUO.Network
                 return;
             }
 
-            const ushort BUFF_ICON_START = 0x03E9;
-            const ushort BUFF_ICON_START_NEW = 0x466;
-
             uint serial = p.ReadUInt();
-            BuffIconType ic = (BuffIconType) p.ReadUShort();
+            ushort graphic = p.ReadUShort();
 
-            ushort iconID = (ushort) ic >= BUFF_ICON_START_NEW ? (ushort) (ic - (BUFF_ICON_START_NEW - 125)) : (ushort) ((ushort) ic - BUFF_ICON_START);
+            BuffGump gump = UIManager.GetGump<BuffGump>();
+            ushort count = p.ReadUShort();
 
-            if (iconID < BuffTable.Table.Length)
+            if (count == 0)
             {
-                BuffGump gump = UIManager.GetGump<BuffGump>();
-                ushort count = p.ReadUShort();
+                World.Player.RemoveBuff(graphic);
+                gump?.RequestUpdateContents();
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    ushort source_type = p.ReadUShort();
+                    p.Skip(2);
+                    ushort icon = p.ReadUShort();
+                    ushort queue_index = p.ReadUShort();
+                    p.Skip(4);
+                    ushort timer = p.ReadUShort();
+                    p.Skip(3);
 
-                if (count == 0)
-                {
-                    World.Player.RemoveBuff(ic);
-                    gump?.RequestUpdateContents();
-                }
-                else
-                {
-                    for (int i = 0; i < count; i++)
+                    uint titleCliloc = p.ReadUInt();
+                    uint descriptionCliloc = p.ReadUInt();
+                    uint wtfCliloc = p.ReadUInt();
+
+                    ushort arg_length = p.ReadUShort();
+                    string args = p.ReadUnicodeReversed();
+                    string title = ClilocLoader.Instance.Translate((int) titleCliloc, args, true);
+
+                    arg_length = p.ReadUShort();
+                    args = p.ReadUnicodeReversed();
+                    string description = string.Empty;
+
+                    if (descriptionCliloc != 0)
                     {
-                        ushort source_type = p.ReadUShort();
-                        p.Skip(2);
-                        ushort icon = p.ReadUShort();
-                        ushort queue_index = p.ReadUShort();
-                        p.Skip(4);
-                        ushort timer = p.ReadUShort();
-                        p.Skip(3);
+                        description = "\n" + ClilocLoader.Instance.Translate((int) descriptionCliloc, args, true);
 
-                        uint titleCliloc = p.ReadUInt();
-                        uint descriptionCliloc = p.ReadUInt();
-                        uint wtfCliloc = p.ReadUInt();
-
-                        ushort arg_length = p.ReadUShort();
-                        string args = p.ReadUnicodeReversed();
-                        string title = ClilocLoader.Instance.Translate((int) titleCliloc, args, true);
-
-                        arg_length = p.ReadUShort();
-                        args = p.ReadUnicodeReversed();
-                        string description = string.Empty;
-
-                        if (descriptionCliloc != 0)
+                        if (description.Length < 2)
                         {
-                            description = "\n" + ClilocLoader.Instance.Translate((int) descriptionCliloc, args, true);
-
-                            if (description.Length < 2)
-                            {
-                                description = string.Empty;
-                            }
+                            description = string.Empty;
                         }
+                    }
 
-                        arg_length = p.ReadUShort();
-                        args = p.ReadUnicodeReversed();
-                        string wtf = string.Empty;
+                    arg_length = p.ReadUShort();
+                    args = p.ReadUnicodeReversed();
+                    string wtf = string.Empty;
 
-                        if (wtfCliloc != 0)
+                    if (wtfCliloc != 0)
+                    {
+                        wtf = ClilocLoader.Instance.Translate((int) wtfCliloc, args, true);
+
+                        if (!string.IsNullOrWhiteSpace(wtf))
                         {
-                            wtf = ClilocLoader.Instance.Translate((int) wtfCliloc, args, true);
-
-                            if (!string.IsNullOrWhiteSpace(wtf))
-                            {
-                                wtf = $"\n{wtf}";
-                            }
+                            wtf = $"\n{wtf}";
                         }
+                    }
 
 
-                        string text = $"<left>{title}{description}{wtf}</left>";
-                        bool alreadyExists = World.Player.IsBuffIconExists(ic);
-                        World.Player.AddBuff(ic, BuffTable.Table[iconID], timer, text);
+                    string text = $"<left>{title}{description}{wtf}</left>";
+                    bool alreadyExists = World.Player.IsBuffIconExists(graphic);
+                    World.Player.AddBuff(graphic, timer, text);
 
-                        if (!alreadyExists)
-                        {
-                            gump?.RequestUpdateContents();
-                        }
+                    if (!alreadyExists)
+                    {
+                        gump?.RequestUpdateContents();
                     }
                 }
             }
