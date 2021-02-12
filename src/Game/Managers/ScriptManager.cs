@@ -58,6 +58,7 @@ namespace ClassicUO.Game.Managers
         {
             Aliases.Register();
             Commands.Register();
+            Expressions.Register();
         }
 
         public void Load()
@@ -228,7 +229,15 @@ namespace ClassicUO.Game.Managers
         {
             try
             {
+                // Execute script (parsing all nodes, executing what possible and queing majority of commands)
                 Interpreter.ExecuteScript();
+
+                // Keep processing all command 
+                foreach (var queue in Command.Queues)
+                {
+                    if(queue.Value.Count > 0 && queue.Value.Peek().PerformWait())
+                        queue.Value.Dequeue();
+                }
             }
             catch (Exception ex)
             {

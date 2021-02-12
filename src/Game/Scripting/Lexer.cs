@@ -112,7 +112,7 @@ namespace ClassicUO.Game.Scripting
         {
             Type = type;
             if (lexeme != null)
-                Lexeme = lexeme;
+                Lexeme = lexeme.ToLower(); // making sure we are all low case
             else
                 Lexeme = "";
             Parent = parent;

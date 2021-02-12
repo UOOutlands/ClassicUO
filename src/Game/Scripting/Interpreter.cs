@@ -19,88 +19,113 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using ClassicUO.Utility;
+using System.ComponentModel;
 
 namespace ClassicUO.Game.Scripting
 {
-    public class RunTimeError : Exception
+    // Generic exception for the script functionality
+    public class ScriptRunTimeError : Exception
     {
         public ASTNode Node;
 
-        public RunTimeError(ASTNode node, string error) : base(error)
+        public ScriptRunTimeError(ASTNode node, string error) : base(error)
+        {
+            Node = node;
+        }
+
+        public ScriptRunTimeError(ASTNode node, string error, Exception inner) : base(error, inner)
         {
             Node = node;
         }
     }
 
+    // Script exception related to calling a command with the wrong syntax (most valuable to player and UI feedback)
+    public class ScriptSyntaxError : ScriptRunTimeError
+    {
+        public ScriptSyntaxError(string error, ScriptRunTimeError inner) : base(inner.Node, error, inner)
+        {
+        }
+    }
+
+    // Script exception related to conversion issues between types, enums, dictionaries, etc
+    public class ScriptTypeConversionError : ScriptRunTimeError
+    {
+        public ScriptTypeConversionError(ASTNode node, string error) : base(node, error)
+        {
+        }
+    }
+
     internal static class TypeConverter
     {
-        public static int ToInt(string token)
+        public static T To<T>(string token)
         {
-            int val;
-
-            if (token.StartsWith("0x"))
+            var converter = TypeDescriptor.GetConverter(typeof(T));
+            if (converter != null)
             {
-                if (int.TryParse(token.Substring(2), NumberStyles.HexNumber, Interpreter.Culture, out val))
-                    return val;
+                if (token.StartsWith("0x"))
+                {
+                    long hexValue = long.Parse(token.Substring(2), NumberStyles.AllowHexSpecifier);
+                    return (T)Convert.ChangeType(hexValue, typeof(T));
+                }
+                else return (T)converter.ConvertFromString(token);
             }
-            else if (int.TryParse(token, out val))
-                return val;
-
-            throw new RunTimeError(null, "Cannot convert argument to int");
+            else throw new ScriptTypeConversionError(null, "Cannot convert argument to " + typeof(T).FullName);
         }
 
-        public static uint ToUInt(string token)
-        {
-            uint val;
+        //public static uint ToUInt(string token)
+        //{
+        //    uint val;
 
-            if (token.StartsWith("0x"))
-            {
-                if (uint.TryParse(token.Substring(2), NumberStyles.HexNumber, Interpreter.Culture, out val))
-                    return val;
-            }
-            else if (uint.TryParse(token, out val))
-                return val;
+        //    if (token.StartsWith("0x"))
+        //    {
+        //        if (uint.TryParse(token.Substring(2), NumberStyles.HexNumber, Interpreter.Culture, out val))
+        //            return val;
+        //    }
+        //    else if (uint.TryParse(token, out val))
+        //        return val;
 
-            throw new RunTimeError(null, "Cannot convert argument to uint");
-        }
+        //    throw new ScriptTypeConversionError(null, "Cannot convert argument to uint");
+        //}
 
-        public static ushort ToUShort(string token)
-        {
-            ushort val;
+        //public static ushort ToUShort(string token)
+        //{
+        //    ushort val;
 
-            if (token.StartsWith("0x"))
-            {
-                if (ushort.TryParse(token.Substring(2), NumberStyles.HexNumber, Interpreter.Culture, out val))
-                    return val;
-            }
-            else if (ushort.TryParse(token, out val))
-                return val;
+        //    if (token.StartsWith("0x"))
+        //    {
+        //        if (ushort.TryParse(token.Substring(2), NumberStyles.HexNumber, Interpreter.Culture, out val))
+        //            return val;
+        //    }
+        //    else if (ushort.TryParse(token, out val))
+        //        return val;
 
-            throw new RunTimeError(null, "Cannot convert argument to ushort");
-        }
+        //    throw new ScriptTypeConversionError(null, "Cannot convert argument to ushort");
+        //}
 
-        public static double ToDouble(string token)
-        {
-            double val;
+        //public static double ToDouble(string token)
+        //{
+        //    double val;
 
-            if (double.TryParse(token, out val))
-                return val;
+        //    if (double.TryParse(token, out val))
+        //        return val;
 
-            throw new RunTimeError(null, "Cannot convert argument to double");
-        }
+        //    throw new ScriptTypeConversionError(null, "Cannot convert argument to double");
+        //}
 
-        public static bool ToBool(string token)
-        {
-            bool val;
+        //public static bool ToBool(string token)
+        //{
+        //    bool val;
 
-            if (bool.TryParse(token, out val))
-                return val;
+        //    if (bool.TryParse(token, out val))
+        //        return val;
 
-            throw new RunTimeError(null, "Cannot convert argument to bool");
-        }
+        //    throw new ScriptTypeConversionError(null, "Cannot convert argument to bool");
+        //}
     }
 
     internal class Scope
@@ -137,122 +162,6 @@ namespace ClassicUO.Game.Scripting
         }
     }
 
-    public class Argument
-    {
-        private ASTNode _node;
-        private ScriptExecutionState _script;
-
-        public Argument(ScriptExecutionState script, ASTNode node)
-        {
-            _node = node;
-            _script = script;
-        }
-
-        // Treat the argument as an integer
-        public int AsInt()
-        {
-            if (_node.Lexeme == null)
-                throw new RunTimeError(_node, "Cannot convert argument to int");
-
-            // Try to resolve it as a scoped variable first
-            var arg = _script.Lookup(_node.Lexeme);
-            if (arg != null)
-                return arg.AsInt();
-
-            return TypeConverter.ToInt(_node.Lexeme);
-        }
-
-        // Treat the argument as an unsigned integer
-        public uint AsUInt()
-        {
-            if (_node.Lexeme == null)
-                throw new RunTimeError(_node, "Cannot convert argument to uint");
-
-            // Try to resolve it as a scoped variable first
-            var arg = _script.Lookup(_node.Lexeme);
-            if (arg != null)
-                return arg.AsUInt();
-
-            return TypeConverter.ToUInt(_node.Lexeme);
-        }
-
-        public ushort AsUShort()
-        {
-            if (_node.Lexeme == null)
-                throw new RunTimeError(_node, "Cannot convert argument to ushort");
-
-            // Try to resolve it as a scoped variable first
-            var arg = _script.Lookup(_node.Lexeme);
-            if (arg != null)
-                return arg.AsUShort();
-
-            return TypeConverter.ToUShort(_node.Lexeme);
-        }
-
-        // Treat the argument as a serial or an alias. Aliases will
-        // be automatically resolved to serial numbers.
-        public uint AsSerial()
-        {
-            if (_node.Lexeme == null)
-                throw new RunTimeError(_node, "Cannot convert argument to serial");
-
-            // Try to resolve it as a scoped variable first
-            var arg = _script.Lookup(_node.Lexeme);
-            if (arg != null)
-                return arg.AsSerial();
-
-            // Resolve it as a global alias next
-            uint serial = Interpreter.GetAlias(_node.Lexeme);
-            if (serial != uint.MaxValue)
-                return serial;
-
-            return AsUInt();
-        }
-
-        // Treat the argument as a string
-        public string AsString()
-        {
-            if (_node.Lexeme == null)
-                throw new RunTimeError(_node, "Cannot convert argument to string");
-
-            // Try to resolve it as a scoped variable first
-            var arg = _script.Lookup(_node.Lexeme);
-            if (arg != null)
-                return arg.AsString();
-
-            return _node.Lexeme;
-        }
-
-        public bool AsBool()
-        {
-            if (_node.Lexeme == null)
-                throw new RunTimeError(_node, "Cannot convert argument to bool");
-
-            return TypeConverter.ToBool(_node.Lexeme);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj == null)
-                return false;
-
-            Argument arg = obj as Argument;
-
-            if (arg == null)
-                return false;
-
-            return Equals(arg);
-        }
-
-        public bool Equals(Argument other)
-        {
-            if (other == null)
-                return false;
-
-            return (other._node.Lexeme == _node.Lexeme);
-        }
-    }
-
     public class ScriptExecutionState
     {
         private ASTNode _statement;
@@ -286,7 +195,7 @@ namespace ClassicUO.Game.Scripting
             _scope = _scope.Parent;
         }
 
-        private Argument[] ConstructArguments(ref ASTNode node)
+        private Argument[] ConstructArgumentList(ref ASTNode node)
         {
             List<Argument> args = new List<Argument>();
 
@@ -336,12 +245,12 @@ namespace ClassicUO.Game.Scripting
                 return false;
 
             if (_statement.Type != ASTNodeType.STATEMENT)
-                throw new RunTimeError(_statement, "Invalid script");
+                throw new ScriptRunTimeError(_statement, "Invalid script");
 
             var node = _statement.FirstChild();
 
             if (node == null)
-                throw new RunTimeError(_statement, "Invalid statement");
+                throw new ScriptRunTimeError(_statement, "Invalid statement");
 
             int depth = 0;
 
@@ -410,7 +319,7 @@ namespace ClassicUO.Game.Scripting
                         }
 
                         if (_statement == null)
-                            throw new RunTimeError(node, "If with no matching endif");
+                            throw new ScriptRunTimeError(node, "If with no matching endif");
 
                         break;
                     }
@@ -439,7 +348,7 @@ namespace ClassicUO.Game.Scripting
                     }
 
                     if (_statement == null)
-                        throw new RunTimeError(node, "If with no matching endif");
+                        throw new ScriptRunTimeError(node, "If with no matching endif");
 
                     break;
                 case ASTNodeType.ENDIF:
@@ -471,7 +380,7 @@ namespace ClassicUO.Game.Scripting
                     }
 
                     if (_statement == null)
-                        throw new RunTimeError(node, "If with no matching endif");
+                        throw new ScriptRunTimeError(node, "If with no matching endif");
 
                     break;
                 case ASTNodeType.WHILE:
@@ -546,7 +455,7 @@ namespace ClassicUO.Game.Scripting
                     }
 
                     if (_statement == null)
-                        throw new RunTimeError(node, "Unexpected endwhile");
+                        throw new ScriptRunTimeError(node, "Unexpected endwhile");
 
                     break;
                 case ASTNodeType.FOR:
@@ -559,11 +468,11 @@ namespace ClassicUO.Game.Scripting
                         {
                             PushScope(node);
 
-                            // Grab the arguments
+                            // Grab the ArgumentList
                             var max = node.FirstChild();
 
                             if (max.Type != ASTNodeType.INTEGER)
-                                throw new RunTimeError(max, "Invalid for loop syntax");
+                                throw new ScriptRunTimeError(max, "Invalid for loop syntax");
 
                             // Create a dummy argument that acts as our loop variable
                             var iter = new ASTNode(ASTNodeType.INTEGER, "0", node, 0);
@@ -575,7 +484,7 @@ namespace ClassicUO.Game.Scripting
                             // Increment the iterator argument
                             var arg = _scope.GetVar(iterName);
 
-                            var iter = new ASTNode(ASTNodeType.INTEGER, (arg.AsUInt() + 1).ToString(), node, 0);
+                            var iter = new ASTNode(ASTNodeType.INTEGER, (arg.As<uint>() + 1).ToString(), node, 0);
 
                             _scope.SetVar(iterName, new Argument(this, iter));
                         }
@@ -587,7 +496,7 @@ namespace ClassicUO.Game.Scripting
                         node = node.FirstChild();
                         var end = new Argument(this, node);
 
-                        if (i.AsUInt() < end.AsUInt())
+                        if (i.As<uint>() < end.As<uint>())
                         {
                             // enter the loop
                             Advance();
@@ -654,7 +563,7 @@ namespace ClassicUO.Game.Scripting
                         else
                         {
                             // Increment the iterator argument
-                            var idx = _scope.GetVar(iterName).AsInt() + 1;
+                            var idx = _scope.GetVar(iterName).As<int>() + 1;
                             var iter = new ASTNode(ASTNodeType.INTEGER, idx.ToString(), node, 0);
                             _scope.SetVar(iterName, new Argument(this, iter));
 
@@ -727,7 +636,7 @@ namespace ClassicUO.Game.Scripting
                     }
 
                     if (_statement == null)
-                        throw new RunTimeError(node, "Unexpected endfor");
+                        throw new ScriptRunTimeError(node, "Unexpected endfor");
 
                     break;
                 case ASTNodeType.BREAK:
@@ -795,7 +704,7 @@ namespace ClassicUO.Game.Scripting
                     }
 
                     if (_statement == null)
-                        throw new RunTimeError(node, "Unexpected continue");
+                        throw new ScriptRunTimeError(node, "Unexpected continue");
                     break;
                 case ASTNodeType.STOP:
                     _statement = null;
@@ -851,29 +760,37 @@ namespace ClassicUO.Game.Scripting
         private bool ExecuteCommand(ASTNode node)
         {
             node = EvaluateModifiers(node, out bool quiet, out bool force, out _);
+            try
+            {
+                if(!Commands.Definitions.ContainsKey(node.Lexeme))
+                    throw new ScriptRunTimeError(node, "Command is not defined");
 
-            var handler = Interpreter.GetCommandHandler(node.Lexeme);
+                var executionResult = Commands.Definitions[node.Lexeme].Process(ConstructArgumentList(ref node), force);
 
-            if (handler == null)
-                throw new RunTimeError(node, "Unknown command");
+                // Attention - even if command logic does noe execute, it parses arguments and therefore should be consuming all nodes
+                if (node != null)
+                    throw new ScriptRunTimeError(node, "Command did not consume all available ArgumentList");
 
-            var cont = handler(node.Lexeme, ConstructArguments(ref node), quiet, force);
-
-            if (node != null)
-                throw new RunTimeError(node, "Command did not consume all available arguments");
-
-            return cont;
+                return executionResult;
+            }
+            catch(ScriptRunTimeError ex)
+            {
+                // If quiete consume script related error to ignore it
+                if(!quiet)
+                    throw ex;
+                return false;
+            }  
         }
 
         private bool EvaluateExpression(ref ASTNode expr)
         {
             if (expr == null || (expr.Type != ASTNodeType.UNARY_EXPRESSION && expr.Type != ASTNodeType.BINARY_EXPRESSION && expr.Type != ASTNodeType.LOGICAL_EXPRESSION))
-                throw new RunTimeError(expr, "No expression following control statement");
+                throw new ScriptRunTimeError(expr, "No expression following control statement");
 
             var node = expr.FirstChild();
 
             if (node == null)
-                throw new RunTimeError(expr, "Empty expression following control statement");
+                throw new ScriptRunTimeError(expr, "Empty expression following control statement");
 
             switch (expr.Type)
             {
@@ -894,7 +811,7 @@ namespace ClassicUO.Game.Scripting
                 node = node.Next();
 
                 if (node == null)
-                    throw new RunTimeError(node, "Invalid logical expression");
+                    throw new ScriptRunTimeError(node, "Invalid logical expression");
 
                 bool rhs;
 
@@ -909,7 +826,7 @@ namespace ClassicUO.Game.Scripting
                         rhs = EvaluateBinaryExpression(ref e);
                         break;
                     default:
-                        throw new RunTimeError(node, "Nested logical expressions are not possible");
+                        throw new ScriptRunTimeError(node, "Nested logical expressions are not possible");
                 }
 
                 switch (op)
@@ -921,7 +838,7 @@ namespace ClassicUO.Game.Scripting
                         lhs = lhs || rhs;
                         break;
                     default:
-                        throw new RunTimeError(node, "Invalid logical operator");
+                        throw new ScriptRunTimeError(node, "Invalid logical operator");
                 }
 
                 node = node.Next();
@@ -975,10 +892,10 @@ namespace ClassicUO.Game.Scripting
             }
             catch (ArgumentException e)
             {
-                throw new RunTimeError(null, e.Message);
+                throw new ScriptRunTimeError(null, e.Message);
             }
 
-            throw new RunTimeError(null, "Unknown operator in expression");
+            throw new ScriptRunTimeError(null, "Unknown operator in expression");
 
         }
 
@@ -989,9 +906,9 @@ namespace ClassicUO.Game.Scripting
             var handler = Interpreter.GetExpressionHandler(node.Lexeme);
 
             if (handler == null)
-                throw new RunTimeError(node, "Unknown expression");
+                throw new ScriptRunTimeError(node, "Unknown expression");
 
-            var result = handler(node.Lexeme, ConstructArguments(ref node), quiet);
+            var result = handler(node.Lexeme, ConstructArgumentList(ref node), quiet);
 
             if (not)
                 return CompareOperands(ASTNodeType.EQUAL, result, false);
@@ -1022,16 +939,16 @@ namespace ClassicUO.Game.Scripting
             switch (node.Type)
             {
                 case ASTNodeType.INTEGER:
-                    val = TypeConverter.ToInt(node.Lexeme);
+                    val = TypeConverter.To<int>(node.Lexeme);
                     break;
                 case ASTNodeType.SERIAL:
-                    val = TypeConverter.ToUInt(node.Lexeme);
+                    val = TypeConverter.To<uint>(node.Lexeme);
                     break;
                 case ASTNodeType.STRING:
                     val = node.Lexeme;
                     break;
                 case ASTNodeType.DOUBLE:
-                    val = TypeConverter.ToDouble(node.Lexeme);
+                    val = TypeConverter.To<double>(node.Lexeme);
                     break;
                 case ASTNodeType.OPERAND:
                     {
@@ -1045,12 +962,12 @@ namespace ClassicUO.Game.Scripting
                         }
                         else
                         {
-                            val = handler(node.Lexeme, ConstructArguments(ref node), quiet);
+                            val = handler(node.Lexeme, ConstructArgumentList(ref node), quiet);
                         }
                         break;
                     }
                 default:
-                    throw new RunTimeError(node, "Invalid type found in expression");
+                    throw new ScriptRunTimeError(node, "Invalid type found in expression");
             }
 
             return val;
@@ -1059,9 +976,6 @@ namespace ClassicUO.Game.Scripting
 
     public static class Interpreter
     {
-        // Aliases only hold serial numbers
-        private static Dictionary<string, uint> _aliases = new Dictionary<string, uint>();
-
         // Lists
         private static Dictionary<string, List<Argument>> _lists = new Dictionary<string, List<Argument>>();
 
@@ -1073,14 +987,6 @@ namespace ClassicUO.Game.Scripting
         public delegate T ExpressionHandler<T>(string expression, Argument[] args, bool quiet) where T : IComparable;
 
         private static Dictionary<string, ExpressionHandler> _exprHandlers = new Dictionary<string, ExpressionHandler>();
-
-        public delegate bool CommandHandler(string command, Argument[] args, bool quiet, bool force);
-
-        private static Dictionary<string, CommandHandler> _commandHandlers = new Dictionary<string, CommandHandler>();
-
-        public delegate uint AliasHandler(string alias);
-
-        private static Dictionary<string, AliasHandler> _aliasHandlers = new Dictionary<string, AliasHandler>();
 
         private static ScriptExecutionState _activeScript = null;
 
@@ -1118,46 +1024,6 @@ namespace ClassicUO.Game.Scripting
             return expression;
         }
 
-        public static void RegisterCommandHandler(string keyword, CommandHandler handler)
-        {
-            _commandHandlers[keyword] = handler;
-        }
-
-        public static CommandHandler GetCommandHandler(string keyword)
-        {
-            _commandHandlers.TryGetValue(keyword, out CommandHandler handler);
-
-            return handler;
-        }
-
-        public static void RegisterAliasHandler(string keyword, AliasHandler handler)
-        {
-            _aliasHandlers[keyword] = handler;
-        }
-
-        public static void UnregisterAliasHandler(string keyword)
-        {
-            _aliasHandlers.Remove(keyword);
-        }
-
-        public static uint GetAlias(string alias)
-        {
-            // If a handler is explicitly registered, call that.
-            if (_aliasHandlers.TryGetValue(alias, out AliasHandler handler))
-                return handler(alias);
-
-            uint value;
-            if (_aliases.TryGetValue(alias, out value))
-                return value;
-
-            return uint.MaxValue;
-        }
-
-        public static void SetAlias(string alias, uint serial)
-        {
-            _aliases[alias] = serial;
-        }
-
         public static void CreateList(string name)
         {
             if (_lists.ContainsKey(name))
@@ -1187,7 +1053,7 @@ namespace ClassicUO.Game.Scripting
         public static bool ListContains(string name, Argument arg)
         {
             if (!_lists.ContainsKey(name))
-                throw new RunTimeError(null, "List does not exist");
+                throw new ScriptRunTimeError(null, "List does not exist");
 
             return _lists[name].Contains(arg);
         }
@@ -1195,7 +1061,7 @@ namespace ClassicUO.Game.Scripting
         public static int ListLength(string name)
         {
             if (!_lists.ContainsKey(name))
-                throw new RunTimeError(null, "List does not exist");
+                throw new ScriptRunTimeError(null, "List does not exist");
 
             return _lists[name].Count;
         }
@@ -1203,7 +1069,7 @@ namespace ClassicUO.Game.Scripting
         public static void PushList(string name, Argument arg, bool front, bool unique)
         {
             if (!_lists.ContainsKey(name))
-                throw new RunTimeError(null, "List does not exist");
+                throw new ScriptRunTimeError(null, "List does not exist");
 
             if (unique && _lists[name].Contains(arg))
                 return;
@@ -1217,7 +1083,7 @@ namespace ClassicUO.Game.Scripting
         public static bool PopList(string name, Argument arg)
         {
             if (!_lists.ContainsKey(name))
-                throw new RunTimeError(null, "List does not exist");
+                throw new ScriptRunTimeError(null, "List does not exist");
 
             return _lists[name].Remove(arg);
         }
@@ -1225,7 +1091,7 @@ namespace ClassicUO.Game.Scripting
         public static bool PopList(string name, bool front)
         {
             if (!_lists.ContainsKey(name))
-                throw new RunTimeError(null, "List does not exist");
+                throw new ScriptRunTimeError(null, "List does not exist");
 
             var idx = front ? 0 : _lists[name].Count - 1;
 
@@ -1237,7 +1103,7 @@ namespace ClassicUO.Game.Scripting
         public static Argument GetListValue(string name, int idx)
         {
             if (!_lists.ContainsKey(name))
-                throw new RunTimeError(null, "List does not exist");
+                throw new ScriptRunTimeError(null, "List does not exist");
 
             var list = _lists[name];
 
@@ -1255,7 +1121,7 @@ namespace ClassicUO.Game.Scripting
         public static TimeSpan GetTimer(string name)
         {
             if (!_timers.TryGetValue(name, out DateTime timestamp))
-                throw new RunTimeError(null, "Timer does not exist");
+                throw new ScriptRunTimeError(null, "Timer does not exist");
 
             TimeSpan elapsed = DateTime.UtcNow - timestamp;
 
@@ -1336,6 +1202,7 @@ namespace ClassicUO.Game.Scripting
                 }
             }
 
+            // Execute script (parsing all nodes, executing what possible and queing majority of commands)
             if (!_activeScript.ExecuteNext())
             {
                 _activeScript = null;
