@@ -715,12 +715,10 @@ namespace ClassicUO.Game.Scenes
 
             float zoom = Camera.Zoom;
 
-            int winGamePosX = 0;
-            int winGamePosY = 0;
             int winGameWidth = ProfileManager.CurrentProfile.GameWindowSize.X;
             int winGameHeight = ProfileManager.CurrentProfile.GameWindowSize.Y;
-            int winGameCenterX = winGamePosX + (winGameWidth >> 1);
-            int winGameCenterY = winGamePosY + (winGameHeight >> 1) + (World.Player.Z << 2);
+            int winGameCenterX = (winGameWidth >> 1);
+            int winGameCenterY = (winGameHeight >> 1) + (World.Player.Z << 2);
             winGameCenterX -= (int) World.Player.Offset.X;
             winGameCenterY -= (int) (World.Player.Offset.Y - World.Player.Offset.Z);
 
@@ -732,37 +730,17 @@ namespace ClassicUO.Game.Scenes
 
             int winGameScaledOffsetX;
             int winGameScaledOffsetY;
-            int winGameScaledWidth;
-            int winGameScaledHeight;
 
             if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableMousewheelScaleZoom)
             {
-                float left = winGamePosX;
-                float right = winGameWidth + left;
-                float top = winGamePosY;
-                float bottom = winGameHeight + top;
-                float newRight = right * zoom;
-                float newBottom = bottom * zoom;
-
-                winGameScaledOffsetX = (int) (left * zoom - (newRight - right));
-                winGameScaledOffsetY = (int) (top * zoom - (newBottom - bottom));
-                winGameScaledWidth = (int) (newRight - winGameScaledOffsetX);
-                winGameScaledHeight = (int) (newBottom - winGameScaledOffsetY);
+                winGameScaledOffsetX = (int)(winGameWidth * (1f - zoom));
+                winGameScaledOffsetY = (int)(winGameHeight * (1f - zoom));
             }
             else
             {
                 winGameScaledOffsetX = 0;
                 winGameScaledOffsetY = 0;
-                winGameScaledWidth = 0;
-                winGameScaledHeight = 0;
             }
-
-
-            //if (_use_render_target)
-            //{
-            //    winDrawOffsetX += winGameScaledOffsetX >> 1;
-            //    winDrawOffsetY += winGameScaledOffsetY >> 1;
-            //}
 
             int width = (int) ((winGameWidth / 44 + 1) * zoom);
             int height = (int) ((winGameHeight / 44 + 1) * zoom);
@@ -785,8 +763,6 @@ namespace ClassicUO.Game.Scenes
             }
 
             int realMaxRangeX = tileOffX + width;
-            //if (realMaxRangeX >= FileManager.Map.MapsDefaultSize[World.Map.Index][0])
-            //    realMaxRangeX = FileManager.Map.MapsDefaultSize[World.Map.Index][0];
 
             int realMinRangeY = tileOffY - height;
 
@@ -796,33 +772,6 @@ namespace ClassicUO.Game.Scenes
             }
 
             int realMaxRangeY = tileOffY + height;
-            //if (realMaxRangeY >= FileManager.Map.MapsDefaultSize[World.Map.Index][1])
-            //    realMaxRangeY = FileManager.Map.MapsDefaultSize[World.Map.Index][1];
-
-            int minBlockX = (realMinRangeX >> 3) - 1;
-            int minBlockY = (realMinRangeY >> 3) - 1;
-            int maxBlockX = (realMaxRangeX >> 3) + 1;
-            int maxBlockY = (realMaxRangeY >> 3) + 1;
-
-            if (minBlockX < 0)
-            {
-                minBlockX = 0;
-            }
-
-            if (minBlockY < 0)
-            {
-                minBlockY = 0;
-            }
-
-            if (maxBlockX >= MapLoader.Instance.MapsDefaultSize[World.Map.Index, 0])
-            {
-                maxBlockX = MapLoader.Instance.MapsDefaultSize[World.Map.Index, 0] - 1;
-            }
-
-            if (maxBlockY >= MapLoader.Instance.MapsDefaultSize[World.Map.Index, 1])
-            {
-                maxBlockY = MapLoader.Instance.MapsDefaultSize[World.Map.Index, 1] - 1;
-            }
 
             int drawOffset = (int) (44 / zoom);
 
