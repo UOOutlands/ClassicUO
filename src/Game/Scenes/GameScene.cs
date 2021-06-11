@@ -98,7 +98,6 @@ namespace ClassicUO.Game.Scenes
         private long _timePing;
 
         private uint _timeToPlaceMultiInHouseCustomization;
-        private readonly bool _use_render_target = false;
         private UseItemQueue _useItemQueue = new UseItemQueue();
         private bool _useObjectHandles;
         private RenderTarget2D _world_render_target, _lightRenderTarget;
@@ -854,81 +853,16 @@ namespace ClassicUO.Game.Scenes
             Viewport r_viewport = batcher.GraphicsDevice.Viewport;
             Viewport camera_viewport = Camera.GetViewport();
 
-            Matrix matrix = _use_render_target ? Matrix.Identity : Camera.ViewTransformMatrix;
+            Matrix matrix = Camera.ViewTransformMatrix;
 
 
-            bool can_draw_lights = false;
+            bool can_draw_lights = PrepareLightsRendering(batcher, ref matrix);
+            batcher.GraphicsDevice.Viewport = camera_viewport;
 
-            if (!_use_render_target)
-            {
-                can_draw_lights = PrepareLightsRendering(batcher, ref matrix);
-                batcher.GraphicsDevice.Viewport = camera_viewport;
-            }
-
-            DrawWorld(batcher, ref matrix, _use_render_target);
-
-            if (_use_render_target)
-            {
-                can_draw_lights = PrepareLightsRendering(batcher, ref matrix);
-                batcher.GraphicsDevice.Viewport = camera_viewport;
-            }
+            DrawWorld(batcher, ref matrix);
 
             // draw world rt
             Vector3 hue = Vector3.Zero;
-
-
-            if (_use_render_target)
-            {
-                //switch (ProfileManager.CurrentProfile.FilterType)
-                //{
-                //    default:
-                //    case 0:
-                //        batcher.SetSampler(SamplerState.PointClamp);
-                //        break;
-                //    case 1:
-                //        batcher.SetSampler(SamplerState.AnisotropicClamp);
-                //        break;
-                //    case 2:
-                //        batcher.SetSampler(SamplerState.LinearClamp);
-                //        break;
-                //}
-
-                if (_xbr == null)
-                {
-                    _xbr = new XBREffect(batcher.GraphicsDevice);
-                }
-
-                _xbr.SetSize(width, height);
-
-
-                //Point p = Point.Zero;
-
-                //p = Camera.ScreenToWorld(p);
-                //int minPixelsX = p.X;
-                //int minPixelsY = p.Y;
-
-                //p.X = Camera.Bounds.Width;
-                //p.Y = Camera.Bounds.Height;
-                //p = Camera.ScreenToWorld(p);
-                //int maxPixelsX = p.X;
-                //int maxPixelsY = p.Y;
-
-                batcher.Begin(null, Camera.ViewTransformMatrix);
-
-                batcher.Draw2D
-                (
-                    _world_render_target,
-                    0,
-                    0,
-                    width,
-                    height,
-                    ref hue
-                );
-
-                batcher.End();
-
-                //batcher.SetSampler(null);
-            }
 
             // draw lights
             if (can_draw_lights)
@@ -973,35 +907,27 @@ namespace ClassicUO.Game.Scenes
             return base.Draw(batcher);
         }
 
-        private void DrawWorld(UltimaBatcher2D batcher, ref Matrix matrix, bool use_render_target)
+        private void DrawWorld(UltimaBatcher2D batcher, ref Matrix matrix)
         {
             SelectedObject.Object = null;
 
-            if (use_render_target)
+            switch (ProfileManager.CurrentProfile.FilterType)
             {
-                batcher.GraphicsDevice.SetRenderTarget(_world_render_target);
-                batcher.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0f, 0);
-            }
-            else
-            {
-                switch (ProfileManager.CurrentProfile.FilterType)
-                {
-                    default:
-                    case 0:
-                        batcher.SetSampler(SamplerState.PointClamp);
+                default:
+                case 0:
+                    batcher.SetSampler(SamplerState.PointClamp);
 
-                        break;
+                    break;
 
-                    case 1:
-                        batcher.SetSampler(SamplerState.AnisotropicClamp);
+                case 1:
+                    batcher.SetSampler(SamplerState.AnisotropicClamp);
 
-                        break;
+                    break;
 
-                    case 2:
-                        batcher.SetSampler(SamplerState.LinearClamp);
+                case 2:
+                    batcher.SetSampler(SamplerState.LinearClamp);
 
-                        break;
-                }
+                    break;
             }
 
 
@@ -1066,11 +992,6 @@ namespace ClassicUO.Game.Scenes
             Weather.Draw(batcher, 0, 0);
             batcher.End();
             batcher.SetSampler(null);
-
-            if (use_render_target)
-            {
-                batcher.GraphicsDevice.SetRenderTarget(null);
-            }
         }
 
         private bool PrepareLightsRendering(UltimaBatcher2D batcher, ref Matrix matrix)
