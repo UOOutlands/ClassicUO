@@ -502,13 +502,13 @@ namespace ClassicUO.Game.Scenes
 
         private void FillGameObjectList()
         {
-            _renderListCount = 0;
-            _foliageCount = 0;
-
             if (!World.InGame)
             {
                 return;
             }
+
+            _renderListCount = 0;
+            _foliageCount = 0;
 
             _isListReady = false;
             _alphaChanged = _alphaTimer < Time.Ticks;
@@ -554,42 +554,48 @@ namespace ClassicUO.Game.Scenes
             Map.Map map = World.Map;
             bool use_handles = _useObjectHandles;
 
-            for (int i = 0; i < 2; ++i)
+            // Iterate through the visible map in a diamond from top to bottom.
+            // First, do the top half of the diamond
+            for (int i = minY; i < maxY; i++)
             {
-                int minValue = minY;
-                int maxValue = maxY;
+                int x = minX;
+                int y = i;
 
-                if (i != 0)
+                while (y >= minY)
                 {
-                    minValue = minX;
-                    maxValue = maxX;
+                    AddTileToRenderList
+                    (
+                        map.GetTile(x, y),
+                        x,
+                        y,
+                        use_handles,
+                        150 /*, null*/
+                    );
+
+                    x++;
+                    y--;
                 }
+            }
 
-                for (int lead = minValue; lead < maxValue; ++lead)
+            // Next, do the bottom half of the diamond
+            for (int i = minX; i < maxX; i++)
+            {
+                int y = maxY;
+                int x = i;
+
+                while (x <= maxX)
                 {
-                    int x = minX;
-                    int y = lead;
+                    AddTileToRenderList
+                    (
+                        map.GetTile(x, y),
+                        x,
+                        y,
+                        use_handles,
+                        150 /*, null*/
+                    );
 
-                    if (i != 0)
-                    {
-                        x = lead;
-                        y = maxY;
-                    }
-
-                    while (x >= minX && x <= maxX && y >= minY && y <= maxY)
-                    {
-                        AddTileToRenderList
-                        (
-                            map.GetTile(x, y),
-                            x,
-                            y,
-                            use_handles,
-                            150 /*, null*/
-                        );
-
-                        ++x;
-                        --y;
-                    }
+                    x++;
+                    y--;
                 }
             }
 
