@@ -263,7 +263,7 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private bool AddTileToRenderList(GameObject obj, int worldX, int worldY, bool useObjectHandles, int maxZ, GameObject parent = null)
+        private void AddTileToRenderList(GameObject obj, int worldX, int worldY, bool useObjectHandles, int maxZ, GameObject parent = null)
         {
             TileDataLoader loader = TileDataLoader.Instance;
 
@@ -295,7 +295,6 @@ namespace ClassicUO.Game.Scenes
                 bool island = false;
                 bool iscorpse = false;
                 bool ismobile = false;
-                bool push_with_priority = false;
                 short height = 0;
                 ushort graphic = obj.Graphic;
 
@@ -304,8 +303,6 @@ namespace ClassicUO.Game.Scenes
                     case Mobile _:
                         maxObjectZ += Constants.DEFAULT_CHARACTER_HEIGHT;
                         ismobile = true;
-                        push_with_priority = true;
-
                         break;
 
                     case Land _:
@@ -317,30 +314,16 @@ namespace ClassicUO.Game.Scenes
                         if (it.IsCorpse)
                         {
                             iscorpse = true;
-                            push_with_priority = true;
-
                             goto default;
                         }
                         else if (it.IsMulti)
                         {
                             graphic = it.MultiGraphic;
                         }
-
-                        push_with_priority = it.ItemData.IsMultiMovable;
-
                         goto default;
 
                     case MovingEffect moveEff:
-                        
-                        push_with_priority = true;
-                        goto default;
-
                     case Multi multi:
-
-                        push_with_priority = multi.IsMovable;
-
-                        goto default;
-
                     default:
 
                         itemData = ref loader.StaticData[graphic];
@@ -433,24 +416,13 @@ namespace ClassicUO.Game.Scenes
 
                 if (maxObjectZ > maxZ)
                 {
-                    return !push_with_priority && itemData.Height != 0 && maxObjectZ - maxZ < height;
-                }
-
-                if (!island)
-                {
-                    //obj.UpdateTextCoordsV();
-                }
-                else
-                {
-                    goto SKIP_INTERNAL_CHECK;
+                    return;
                 }
 
                 if (!ismobile && !iscorpse && !island && itemData.IsInternal)
                 {
                     continue;
                 }
-
-                SKIP_INTERNAL_CHECK:
 
                 sbyte z = obj.Z;
 
@@ -504,11 +476,6 @@ namespace ClassicUO.Game.Scenes
                 if (testMinZ < _minPixel.Y)
                 {
                     continue;
-                }
-
-                if (push_with_priority)
-                {
-                    AddOffsetCharacterTileToRenderList(obj, useObjectHandles, !iscorpse && !ismobile);
                 }
 
                 if (!island)
@@ -590,95 +557,7 @@ namespace ClassicUO.Game.Scenes
                 _renderList[_renderListCount++] = obj;
             }
 
-            return false;
-        }
-
-
-        private unsafe void AddOffsetCharacterTileToRenderList(GameObject entity, bool useObjectHandles, bool ignoreDefaultHeightOffset)
-        {
-            ref ushort charX = ref entity.X;
-            ref ushort charY = ref entity.Y;
-            ref short maxZ = ref entity.PriorityZ;
-
-            /*  Rotation 45° side: --->
-             *
-             *      [ ][ ][ ][ ][ ][ ][ ]
-             *      [ ][ ][ ][ ][1][6][ ]
-             *      [ ][ ][ ][ ][0][7][ ]
-             *      [ ][ ][ ][+][4][ ][ ]
-             *      [ ][ ][ ][2][5][ ][ ]
-             *      [ ][ ][3][ ][ ][ ][ ]
-             *      [ ][ ][ ][ ][ ][ ][ ]
-             *
-             */
-
-            Point* listOffs = stackalloc Point[8];
-
-            listOffs[0].X = charX + 1;
-            listOffs[0].Y = charY - 1;
-
-            listOffs[1].X = charX + 1;
-            listOffs[1].Y = charY - 2;
-
-                // do not apply zoffset
-                listOffs[6].X = charX + 2;
-                listOffs[6].Y = charY - 2;
-
-            // do not apply zoffset
-            listOffs[3].X = charX - 1;
-            listOffs[3].Y = charY + 2;
-
-            // do not apply zoffset
-            listOffs[2].X = charX;
-            listOffs[2].Y = charY + 1;
-
-            // do not apply zoffset
-            listOffs[4].X = charX + 1;
-            listOffs[4].Y = charY;
-
-                // drop it (?)
-                listOffs[7].X = charX + 2;
-                listOffs[7].Y = charY - 1;
-
-            // do not apply zoffset
-            listOffs[5].X = charX + 1;
-            listOffs[5].Y = charY + 1;
-
-            for (byte i = 0; i < 8; i++)
-            {
-                ref Point p = ref listOffs[i];
-
-                if (p.X < _minTile.X || p.X > _maxTile.X ||
-                    p.Y < _minTile.Y || p.Y > _maxTile.Y)
-                {
-                    continue;
-                }
-
-                int currentMaxZ = maxZ;
-
-                if (!ignoreDefaultHeightOffset && i <= 1)
-                {
-                    currentMaxZ += 20;
-                }
-
-                GameObject tile = World.Map.GetTile(p.X, p.Y);
-
-                if (tile != null)
-                {
-                    if (AddTileToRenderList
-                    (
-                        tile,
-                        p.X,
-                        p.Y,
-                        useObjectHandles,
-                        currentMaxZ,
-                        entity
-                    ) && i >= 4)
-                    {
-                        break;
-                    }
-                }
-            }
+            return;
         }
 
         private void GetViewPort()
