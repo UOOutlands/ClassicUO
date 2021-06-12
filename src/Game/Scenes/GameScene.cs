@@ -627,14 +627,7 @@ namespace ClassicUO.Game.Scenes
 
         private void UpdateTextServerEntities<T>(IEnumerable<T> entities, bool force) where T : Entity
         {
-            foreach (T e in entities)
-            {
-                if (e.UseInRender != _renderIndex && e.TextContainer != null && !e.TextContainer.IsEmpty && (force || e.Graphic == 0x2006))
-                {
-                    e.UpdateRealScreenPosition(_offset.X, _offset.Y);
-                    e.UseInRender = (byte) _renderIndex;
-                }
-            }
+            // TODO: Something?
         }
 
         public override void Update(double totalTime, double frameTime)

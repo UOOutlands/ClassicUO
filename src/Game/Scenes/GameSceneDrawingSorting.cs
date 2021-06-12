@@ -281,8 +281,6 @@ namespace ClassicUO.Game.Scenes
                     obj.UpdateRealScreenPosition(_offset.X, _offset.Y);
                 }
 
-                obj.UseInRender = 0xFF;
-
                 int drawX = obj.RealScreenPosition.X;
                 int drawY = obj.RealScreenPosition.Y;
 
@@ -475,8 +473,6 @@ namespace ClassicUO.Game.Scenes
 
                         if (!changinAlpha)
                         {
-                            obj.UseInRender = (byte) _renderIndex;
-
                             continue;
                         }
                     }
@@ -596,8 +592,6 @@ namespace ClassicUO.Game.Scenes
                 }
 
                 _renderList[_renderListCount++] = obj;
-
-                obj.UseInRender = (byte) _renderIndex;
             }
 
             return false;

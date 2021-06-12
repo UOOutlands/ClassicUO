@@ -99,7 +99,6 @@ namespace ClassicUO.Game.GameObjects
         public short PriorityZ;
         public GameObject TNext;
         public GameObject TPrevious;
-        public byte UseInRender;
 
         public ushort X, Y;
         public sbyte Z;
@@ -366,7 +365,6 @@ namespace ClassicUO.Game.GameObjects
             Hue = 0;
             Offset = Vector3.Zero;
             CurrentRenderIndex = 0;
-            UseInRender = 0;
             RealScreenPosition = Point.Zero;
             _screenPosition = Point.Zero;
             IsFlipped = false;
