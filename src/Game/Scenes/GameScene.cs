@@ -959,9 +959,7 @@ namespace ClassicUO.Game.Scenes
 
             for (int i = 0; i < _renderListCount; ++i)
             {
-                ref var info = ref _renderList[i];
-
-                var obj = info.Object;
+                var obj = _renderList[i];
 
                 if (obj.Z <= _maxGroundZ)
                 {
@@ -970,15 +968,10 @@ namespace ClassicUO.Game.Scenes
                         GameObject.DrawTransparent = obj.TransparentTest(z);
                     }
 
-                    hue = obj.Hue;
-                    obj.Hue = info.Hue;
-
                     if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y, ref hueVec))
                     {
                         ++RenderedObjectsCount;
                     }
-
-                    obj.Hue = hue;
                 }
             }
 

@@ -47,13 +47,7 @@ namespace ClassicUO.Game.Scenes
 {
     internal partial class GameScene
     {
-        struct DrawingInfo
-        {
-            public GameObject Object;
-            public ushort Hue;
-        }
-
-        private static DrawingInfo[] _renderList = new DrawingInfo[10000];
+        private static GameObject[] _renderList = new GameObject[10000];
         private static GameObject[] _foliages = new GameObject[100];
         private static readonly GameObject[] _objectHandles = new GameObject[Constants.MAX_OBJECT_HANDLES];
         private static readonly TreeUnion[] _treeInfos =
@@ -600,18 +594,8 @@ namespace ClassicUO.Game.Scenes
                     int newsize = _renderList.Length + 1000;
                     Array.Resize(ref _renderList, newsize);
                 }
-                
-                ref var info = ref _renderList[_renderListCount++];
-                info.Object = obj;
 
-                if (CUOEnviroment.Debug)
-                {
-                    info.Hue = (ushort) (parent != null ? 0x0044 : 300 + obj.PriorityZ);
-                }
-                else
-                {
-                    info.Hue = obj.Hue;
-                }
+                _renderList[_renderListCount++] = obj;
 
                 obj.UseInRender = (byte) _renderIndex;
             }
