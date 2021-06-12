@@ -620,13 +620,6 @@ namespace ClassicUO.Game.Scenes
             UpdateTextServerEntities(World.Mobiles.Values, true);
             UpdateTextServerEntities(World.Items.Values, false);
 
-            _renderIndex++;
-
-            if (_renderIndex >= 100)
-            {
-                _renderIndex = 1;
-            }
-
             UpdateDrawPosition = false;
             _isListReady = true;
         }
@@ -1052,20 +1045,13 @@ namespace ClassicUO.Game.Scenes
         {
             _healthLinesManager.Draw(batcher);
 
-            int renderIndex = _renderIndex - 1;
-
-            if (renderIndex < 1)
-            {
-                renderIndex = 99;
-            }
-
             if (!UIManager.IsMouseOverWorld)
             {
                 SelectedObject.Object = null;
             }
 
             World.WorldTextManager.ProcessWorldText(true);
-            World.WorldTextManager.Draw(batcher, x, y, renderIndex);
+            World.WorldTextManager.Draw(batcher, x, y);
 
             SelectedObject.LastObject = SelectedObject.Object;
         }

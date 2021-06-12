@@ -90,7 +90,6 @@ namespace ClassicUO.Game.GameObjects
         {
         }
 
-        public int CurrentRenderIndex;
         // FIXME: remove it
         public sbyte FoliageIndex = -1;
         public ushort Graphic;
@@ -364,7 +363,6 @@ namespace ClassicUO.Game.GameObjects
             IsPositionChanged = false;
             Hue = 0;
             Offset = Vector3.Zero;
-            CurrentRenderIndex = 0;
             RealScreenPosition = Point.Zero;
             _screenPosition = Point.Zero;
             IsFlipped = false;

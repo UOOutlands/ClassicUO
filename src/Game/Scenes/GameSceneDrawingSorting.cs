@@ -72,7 +72,6 @@ namespace ClassicUO.Game.Scenes
         private int _objectHandlesCount;
         private Point _offset, _maxTile, _minTile, _last_scaled_offset;
         private int _oldPlayerX, _oldPlayerY, _oldPlayerZ;
-        private int _renderIndex = 1;
         private int _renderListCount, _foliageCount;
 
 
@@ -270,13 +269,12 @@ namespace ClassicUO.Game.Scenes
 
             for (; obj != null; obj = obj.TNext)
             {
-                // some object is invsible but it has to be processed [overhead text for now]
-                if (obj.CurrentRenderIndex == _renderIndex /*|| !obj.AllowedToDraw*/)
+                if (!obj.AllowedToDraw)
                 {
                     continue;
                 }
 
-                if (UpdateDrawPosition && obj.CurrentRenderIndex != _renderIndex || obj.IsPositionChanged)
+                if (UpdateDrawPosition || obj.IsPositionChanged)
                 {
                     obj.UpdateRealScreenPosition(_offset.X, _offset.Y);
                 }
@@ -437,8 +435,6 @@ namespace ClassicUO.Game.Scenes
                 {
                     return !push_with_priority && itemData.Height != 0 && maxObjectZ - maxZ < height;
                 }
-
-                obj.CurrentRenderIndex = _renderIndex;
 
                 if (!island)
                 {
