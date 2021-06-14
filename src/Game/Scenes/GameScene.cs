@@ -567,8 +567,7 @@ namespace ClassicUO.Game.Scenes
                         map.GetTile(x, y),
                         x,
                         y,
-                        use_handles,
-                        150 /*, null*/
+                        use_handles
                     );
 
                     x++;
@@ -589,8 +588,7 @@ namespace ClassicUO.Game.Scenes
                         map.GetTile(x, y),
                         x,
                         y,
-                        use_handles,
-                        150 /*, null*/
+                        use_handles
                     );
 
                     x++;

@@ -286,7 +286,30 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private void AddTileToRenderList(GameObject obj, int worldX, int worldY, bool useObjectHandles, int maxZ, GameObject parent = null)
+        private bool InViewport(GameObject obj)
+        {
+            if (UpdateDrawPosition || obj.IsPositionChanged)
+            {
+                obj.UpdateRealScreenPosition(_offset.X, _offset.Y);
+            }
+
+            int drawX = obj.RealScreenPosition.X;
+            int drawY = obj.RealScreenPosition.Y;
+
+            if (drawX < _minPixel.X || drawX > _maxPixel.X)
+            {
+                return false;
+            }
+
+            if (drawY < _minPixel.Y || drawY > _maxPixel.Y)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private void AddTileToRenderList(GameObject obj, int worldX, int worldY, bool useObjectHandles)
         {
             TileDataLoader loader = TileDataLoader.Instance;
 
@@ -302,15 +325,10 @@ namespace ClassicUO.Game.Scenes
                     obj.UpdateRealScreenPosition(_offset.X, _offset.Y);
                 }
 
-                int drawX = obj.RealScreenPosition.X;
-                int drawY = obj.RealScreenPosition.Y;
-
-                if (drawX < _minPixel.X || drawX > _maxPixel.X)
+                if (!InViewport(obj))
                 {
-                    break;
+                    continue;
                 }
-
-                int maxObjectZ = obj.PriorityZ;
 
                 ref StaticTiles itemData = ref _empty;
 
@@ -324,7 +342,6 @@ namespace ClassicUO.Game.Scenes
                 switch (obj)
                 {
                     case Mobile _:
-                        maxObjectZ += Constants.DEFAULT_CHARACTER_HEIGHT;
                         ismobile = true;
                         UpdateObjectHandles(obj, useObjectHandles);
                         break;
@@ -388,33 +405,7 @@ namespace ClassicUO.Game.Scenes
                             continue;
                         }
 
-
-                        if (itemData.Height != 0xFF /*&& itemData.Flags != 0*/)
-                        {
-                            height = itemData.Height;
-
-                            if (itemData.Height == 0)
-                            {
-                                if (!itemData.IsBackground && !itemData.IsSurface)
-                                {
-                                    height = 10;
-                                }
-                            }
-
-                            if ((itemData.Flags & (TileFlag.Bridge)) != 0)
-                            {
-                                height /= 2;
-                            }
-
-                            maxObjectZ += height;
-                        }
-
                         break;
-                }
-
-                if (maxObjectZ > maxZ)
-                {
-                    return;
                 }
 
                 if (!ismobile && !iscorpse && !island && itemData.IsInternal)
@@ -444,38 +435,6 @@ namespace ClassicUO.Game.Scenes
                     }
                 }
 
-                int testMaxZ = drawY;
-
-                if (testMaxZ > _maxPixel.Y)
-                {
-                    continue;
-                }
-
-                int testMinZ = drawY + (z << 2);
-
-                if (island)
-                {
-                    Land t = obj as Land;
-
-                    if (t.IsStretched)
-                    {
-                        testMinZ -= t.MinZ << 2;
-                    }
-                    else
-                    {
-                        testMinZ = testMaxZ;
-                    }
-                }
-                else
-                {
-                    testMinZ = testMaxZ;
-                }
-
-                if (testMinZ < _minPixel.Y)
-                {
-                    continue;
-                }
-
                 if (!island)
                 {
                     if (!iscorpse && !ismobile && itemData.IsFoliage)
@@ -502,8 +461,8 @@ namespace ClassicUO.Game.Scenes
 
                                 if (texture != null)
                                 {
-                                    _rectangleObj.X = drawX - (texture.Width >> 1) + texture.ImageRectangle.X;
-                                    _rectangleObj.Y = drawY - texture.Height + texture.ImageRectangle.Y;
+                                    _rectangleObj.X = obj.RealScreenPosition.X - (texture.Width >> 1) + texture.ImageRectangle.X;
+                                    _rectangleObj.Y = obj.RealScreenPosition.Y - texture.Height + texture.ImageRectangle.Y;
                                     _rectangleObj.Width = texture.ImageRectangle.Width;
                                     _rectangleObj.Height = texture.ImageRectangle.Height;
 
