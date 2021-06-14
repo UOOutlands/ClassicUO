@@ -46,7 +46,6 @@ namespace ClassicUO.Game.GameObjects
             {
                 s.IsDestroyed = false;
                 s.AlphaHue = 0;
-                s.FoliageIndex = 0;
             }
         );
 

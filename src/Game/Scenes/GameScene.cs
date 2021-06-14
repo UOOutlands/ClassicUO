@@ -508,7 +508,6 @@ namespace ClassicUO.Game.Scenes
             }
 
             _renderListCount = 0;
-            _foliageCount = 0;
 
             _isListReady = false;
             _alphaChanged = _alphaTimer < Time.Ticks;
@@ -516,13 +515,6 @@ namespace ClassicUO.Game.Scenes
             if (_alphaChanged)
             {
                 _alphaTimer = Time.Ticks + Constants.ALPHA_TIME;
-            }
-
-            FoliageIndex++;
-
-            if (FoliageIndex >= 100)
-            {
-                FoliageIndex = 1;
             }
 
             GetViewPort();
@@ -539,12 +531,14 @@ namespace ClassicUO.Game.Scenes
             }
 
             _rectanglePlayer.X = (int) (World.Player.RealScreenPosition.X - World.Player.FrameInfo.X + 22 + World.Player.Offset.X);
-
             _rectanglePlayer.Y = (int) (World.Player.RealScreenPosition.Y - World.Player.FrameInfo.Y + 22 + (World.Player.Offset.Y - World.Player.Offset.Z));
-
             _rectanglePlayer.Width = World.Player.FrameInfo.Width;
             _rectanglePlayer.Height = World.Player.FrameInfo.Height;
 
+            _foliageHitBox.X = _rectanglePlayer.X - 100;
+            _foliageHitBox.Y = _rectanglePlayer.Y - 50;
+            _foliageHitBox.Width = _rectanglePlayer.Width + 200;
+            _foliageHitBox.Height = _rectanglePlayer.Height + 50;
 
             int minX = _minTile.X;
             int minY = _minTile.Y;
@@ -595,24 +589,6 @@ namespace ClassicUO.Game.Scenes
                     y--;
                 }
             }
-
-            if (_alphaChanged)
-            {
-                for (int i = 0; i < _foliageCount; i++)
-                {
-                    GameObject f = _foliages[i];
-
-                    if (f.FoliageIndex == FoliageIndex)
-                    {
-                        f.ProcessAlpha(Constants.FOLIAGE_ALPHA);
-                    }
-                    else
-                    {
-                        f.ProcessAlpha(0xFF);
-                    }
-                }
-            }
-
 
             UpdateTextServerEntities(World.Mobiles.Values, true);
             UpdateTextServerEntities(World.Items.Values, false);

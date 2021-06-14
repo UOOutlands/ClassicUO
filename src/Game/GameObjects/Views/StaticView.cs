@@ -119,7 +119,7 @@ namespace ClassicUO.Game.GameObjects
                 Client.Game.GetScene<GameScene>().AddLight(this, this, posX + 22, posY + 22);
             }
 
-            if (!(SelectedObject.Object == this || FoliageIndex != -1 && Client.Game.GetScene<GameScene>().FoliageIndex == FoliageIndex))
+            if (SelectedObject.Object != this)
             {
                 if (DrawTransparent)
                 {

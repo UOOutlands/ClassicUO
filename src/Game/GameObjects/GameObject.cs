@@ -90,8 +90,6 @@ namespace ClassicUO.Game.GameObjects
         {
         }
 
-        // FIXME: remove it
-        public sbyte FoliageIndex = -1;
         public ushort Graphic;
         public ushort Hue;
         public Vector3 Offset;

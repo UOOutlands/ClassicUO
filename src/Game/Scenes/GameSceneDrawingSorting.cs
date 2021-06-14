@@ -48,21 +48,8 @@ namespace ClassicUO.Game.Scenes
     internal partial class GameScene
     {
         private static GameObject[] _renderList = new GameObject[10000];
-        private static GameObject[] _foliages = new GameObject[100];
-        private static readonly TreeUnion[] _treeInfos =
-        {
-            new TreeUnion(0x0D45, 0x0D4C),
-            new TreeUnion(0x0D5C, 0x0D62),
-            new TreeUnion(0x0D73, 0x0D79),
-            new TreeUnion(0x0D87, 0x0D8B),
-            new TreeUnion(0x12BE, 0x12C7),
-            new TreeUnion(0x0D4D, 0x0D53),
-            new TreeUnion(0x0D63, 0x0D69),
-            new TreeUnion(0x0D7A, 0x0D7F),
-            new TreeUnion(0x0D8C, 0x0D90)
-        };
         private StaticTiles _empty;
-
+        private Rectangle _foliageHitBox;
 
         private sbyte _maxGroundZ;
         private int _maxZ;
@@ -70,12 +57,10 @@ namespace ClassicUO.Game.Scenes
         private bool _noDrawRoofs;
         private Point _offset, _maxTile, _minTile, _last_scaled_offset;
         private int _oldPlayerX, _oldPlayerY, _oldPlayerZ;
-        private int _renderListCount, _foliageCount;
+        private int _renderListCount;
 
 
         public Point ScreenOffset => _offset;
-        public sbyte FoliageIndex { get; private set; }
-
 
         public void UpdateMaxDrawZ(bool force = false)
         {
@@ -218,49 +203,6 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private void IsFoliageUnion(ushort graphic, int x, int y, int z)
-        {
-            for (int i = 0; i < _treeInfos.Length; i++)
-            {
-                ref TreeUnion info = ref _treeInfos[i];
-
-                if (info.Start <= graphic && graphic <= info.End)
-                {
-                    while (graphic > info.Start)
-                    {
-                        graphic--;
-                        x--;
-                        y++;
-                    }
-
-                    for (graphic = info.Start; graphic <= info.End; graphic++, x++, y--)
-                    {
-                        ApplyFoliageTransparency(graphic, x, y, z);
-                    }
-
-                    break;
-                }
-            }
-        }
-
-        private void ApplyFoliageTransparency(ushort graphic, int x, int y, int z)
-        {
-            GameObject tile = World.Map.GetTile(x, y);
-
-            if (tile != null)
-            {
-                for (GameObject obj = tile; obj != null; obj = obj.TNext)
-                {
-                    ushort testGraphic = obj.Graphic;
-
-                    if (testGraphic == graphic && obj.Z == z)
-                    {
-                        obj.FoliageIndex = FoliageIndex;
-                    }
-                }
-            }
-        }
-
         private void UpdateObjectHandles(GameObject obj, bool useObjectHandles)
         {
             if (useObjectHandles && NameOverHeadManager.IsAllowed(obj as Entity))
@@ -285,6 +227,58 @@ namespace ClassicUO.Game.Scenes
                 obj.UpdateTextCoordsV();
             }
         }
+
+        private bool ProcessFoliage(GameObject obj, ref StaticTiles itemData)
+        {
+            if (!itemData.IsFoliage || itemData.IsMultiMovable || World.Season >= Season.Winter && !(obj is Multi))
+            {
+                return true;
+            }
+
+            if ((ProfileManager.CurrentProfile.TreeToStumps && !(obj is Multi)) ||
+                (ProfileManager.CurrentProfile.HideVegetation && (obj is Multi mm && mm.IsVegetation || obj is Static st && st.IsVegetation)))
+            {
+                return false;
+            }
+
+            if (_alphaChanged)
+            {
+                bool hide = false;
+
+                // If the player is standing behind the foliage, make it transparent
+                if ((World.Player.X <= obj.X && World.Player.Y <= obj.Y) ||
+                    (World.Player.Y <= obj.Y && World.Player.X <= (obj.X + 1)) ||
+                    (World.Player.X <= obj.X && World.Player.Y <= (obj.Y + 1)))
+                {
+                    ArtTexture texture = ArtLoader.Instance.GetTexture(obj.Graphic);
+
+                    if (texture != null)
+                    {
+                        _rectangleObj.X = obj.RealScreenPosition.X - (texture.Width >> 1) + texture.ImageRectangle.X;
+                        _rectangleObj.Y = obj.RealScreenPosition.Y - texture.Height + texture.ImageRectangle.Y;
+                        _rectangleObj.Width = texture.ImageRectangle.Width;
+                        _rectangleObj.Height = texture.ImageRectangle.Height;
+
+                        hide = Exstentions.InRect(ref _rectangleObj, ref _foliageHitBox);
+                    }
+                }
+
+                if (hide)
+                {
+                    if (obj.AlphaHue != Constants.FOLIAGE_ALPHA)
+                    {
+                        obj.ProcessAlpha(Constants.FOLIAGE_ALPHA);
+                    }
+                }
+                else if (obj.AlphaHue != 0xFF)
+                {
+                    obj.ProcessAlpha(0xFF);
+                }
+            }
+
+            return true;
+        }
+
 
         private bool ProcessAlpha(GameObject obj, ref StaticTiles itemData)
         {
@@ -423,7 +417,7 @@ namespace ClassicUO.Game.Scenes
                             continue;
                         }
 
-                        if (itemData.IsFoliage && !itemData.IsMultiMovable && World.Season >= Season.Winter && !(obj is Multi))
+                        if (!ProcessFoliage(obj, ref itemData))
                         {
                             continue;
                         }
@@ -431,63 +425,6 @@ namespace ClassicUO.Game.Scenes
                         if (!ProcessAlpha(obj, ref itemData))
                         {
                             continue;
-                        }
-
-                        //we avoid to hide impassable foliage or bushes, if present...
-                        if (ProfileManager.CurrentProfile.TreeToStumps && itemData.IsFoliage && !itemData.IsMultiMovable && !(obj is Multi) || ProfileManager.CurrentProfile.HideVegetation && (obj is Multi mm && mm.IsVegetation || obj is Static st && st.IsVegetation))
-                        {
-                            continue;
-                        }
-
-                        if (itemData.IsFoliage)
-                        {
-                            if (obj.FoliageIndex != FoliageIndex)
-                            {
-                                sbyte index = 0;
-
-                                bool check = World.Player.X <= worldX && World.Player.Y <= worldY;
-
-                                if (!check)
-                                {
-                                    check = World.Player.Y <= worldY && World.Player.X <= worldX + 1;
-
-                                    if (!check)
-                                    {
-                                        check = World.Player.X <= worldX && World.Player.Y <= worldY + 1;
-                                    }
-                                }
-
-                                if (check)
-                                {
-                                    ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
-
-                                    if (texture != null)
-                                    {
-                                        _rectangleObj.X = obj.RealScreenPosition.X - (texture.Width >> 1) + texture.ImageRectangle.X;
-                                        _rectangleObj.Y = obj.RealScreenPosition.Y - texture.Height + texture.ImageRectangle.Y;
-                                        _rectangleObj.Width = texture.ImageRectangle.Width;
-                                        _rectangleObj.Height = texture.ImageRectangle.Height;
-
-                                        check = Exstentions.InRect(ref _rectangleObj, ref _rectanglePlayer);
-
-                                        if (check)
-                                        {
-                                            index = FoliageIndex;
-                                            IsFoliageUnion(obj.Graphic, obj.X, obj.Y, obj.Z);
-                                        }
-                                    }
-                                }
-
-                                obj.FoliageIndex = index;
-                            }
-
-                            if (_foliageCount >= _foliages.Length)
-                            {
-                                int newsize = _foliages.Length + 50;
-                                Array.Resize(ref _foliages, newsize);
-                            }
-
-                            _foliages[_foliageCount++] = obj;
                         }
 
                         break;
