@@ -286,6 +286,48 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
+        private bool ProcessAlpha(GameObject obj, ref StaticTiles itemData)
+        {
+            if (obj.Z >= _maxZ)
+            {
+                if (_alphaChanged)
+                {
+                    obj.ProcessAlpha(0);
+                }
+
+                return obj.AlphaHue != 0;
+            }
+            else if (_noDrawRoofs && itemData.IsRoof)
+            {
+                if (_alphaChanged)
+                {
+                    obj.ProcessAlpha(0);
+                }
+
+                return obj.AlphaHue != 0;
+            }
+            else if (itemData.IsTranslucent && obj.AlphaHue != 178)
+            {
+                if (_alphaChanged)
+                {
+                    obj.ProcessAlpha(178);
+                }
+
+                return true;
+            }
+            else if (!itemData.IsFoliage && obj.AlphaHue != 0xFF)
+            {
+                if (_alphaChanged)
+                {
+                    obj.ProcessAlpha(0xFF);
+                }
+
+                return true;
+            }
+
+            return true;
+        }
+
         private bool InViewport(GameObject obj)
         {
             if (UpdateDrawPosition || obj.IsPositionChanged)
@@ -332,17 +374,26 @@ namespace ClassicUO.Game.Scenes
 
                 ref StaticTiles itemData = ref _empty;
 
-                bool changinAlpha = false;
                 bool island = false;
                 bool iscorpse = false;
                 bool ismobile = false;
-                short height = 0;
                 ushort graphic = obj.Graphic;
 
                 switch (obj)
                 {
                     case Mobile _:
                         ismobile = true;
+
+                        if (obj.Z >= _maxZ)
+                        {
+                            continue;
+                        }
+
+                        if (_alphaChanged && obj.AlphaHue != 0xFF)
+                        {
+                            obj.ProcessAlpha(0xFF);
+                        }
+
                         UpdateObjectHandles(obj, useObjectHandles);
                         break;
 
@@ -382,21 +433,9 @@ namespace ClassicUO.Game.Scenes
                             continue;
                         }
 
-                        if (_noDrawRoofs && itemData.IsRoof)
+                        if (!ProcessAlpha(obj, ref itemData))
                         {
-                            if (_alphaChanged)
-                            {
-                                changinAlpha = obj.ProcessAlpha(0);
-                            }
-                            else
-                            {
-                                changinAlpha = obj.AlphaHue != 0;
-                            }
-
-                            if (!changinAlpha)
-                            {
-                                continue;
-                            }
+                            continue;
                         }
 
                         //we avoid to hide impassable foliage or bushes, if present...
@@ -414,26 +453,6 @@ namespace ClassicUO.Game.Scenes
                 }
 
                 sbyte z = obj.Z;
-
-                if (!island && z >= _maxZ)
-                {
-                    if (!changinAlpha)
-                    {
-                        if (_alphaChanged)
-                        {
-                            changinAlpha = obj.ProcessAlpha(0);
-                        }
-                        else
-                        {
-                            changinAlpha = obj.AlphaHue != 0;
-                        }
-
-                        if (!changinAlpha)
-                        {
-                            continue;
-                        }
-                    }
-                }
 
                 if (!island)
                 {
@@ -488,18 +507,6 @@ namespace ClassicUO.Game.Scenes
                         _foliages[_foliageCount++] = obj;
 
                         goto FOLIAGE_SKIP;
-                    }
-
-                    if (_alphaChanged && !changinAlpha)
-                    {
-                        if (itemData.IsTranslucent)
-                        {
-                            obj.ProcessAlpha(178);
-                        }
-                        else if (!itemData.IsFoliage && obj.AlphaHue != 0xFF)
-                        {
-                            obj.ProcessAlpha(0xFF);
-                        }
                     }
                 }
                 
