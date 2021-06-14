@@ -390,12 +390,6 @@ namespace ClassicUO.Game.Scenes
                         break;
 
                     case Item it:
-                        if (it.IsCorpse)
-                        {
-                            UpdateObjectHandles(obj, useObjectHandles);
-                            goto default;
-                        }
-
                         if (it.IsMulti)
                         {
                             graphic = it.MultiGraphic;
@@ -403,11 +397,32 @@ namespace ClassicUO.Game.Scenes
 
                         itemData = ref loader.StaticData[graphic];
 
+                        if (itemData.IsInternal)
+                        {
+                            continue;
+                        }
+
+                        if (it.IsCorpse)
+                        {
+                            UpdateObjectHandles(obj, useObjectHandles);
+                        }
+
                         if (!it.IsLocked || (it.IsLocked && itemData.IsContainer))
                         {
                             UpdateObjectHandles(obj, useObjectHandles);
                         }
-                        goto default;
+
+                        if (!ProcessFoliage(obj, ref itemData))
+                        {
+                            continue;
+                        }
+
+                        if (!ProcessAlpha(obj, ref itemData))
+                        {
+                            continue;
+                        }
+
+                        break;
 
                     default:
                         itemData = ref loader.StaticData[graphic];
