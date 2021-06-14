@@ -374,16 +374,11 @@ namespace ClassicUO.Game.Scenes
 
                 ref StaticTiles itemData = ref _empty;
 
-                bool island = false;
-                bool iscorpse = false;
-                bool ismobile = false;
                 ushort graphic = obj.Graphic;
 
                 switch (obj)
                 {
                     case Mobile _:
-                        ismobile = true;
-
                         if (obj.Z >= _maxZ)
                         {
                             continue;
@@ -398,13 +393,11 @@ namespace ClassicUO.Game.Scenes
                         break;
 
                     case Land _:
-                        island = true;
                         break;
 
                     case Item it:
                         if (it.IsCorpse)
                         {
-                            iscorpse = true;
                             UpdateObjectHandles(obj, useObjectHandles);
                             goto default;
                         }
@@ -422,11 +415,13 @@ namespace ClassicUO.Game.Scenes
                         }
                         goto default;
 
-                    case MovingEffect moveEff:
-                    case Multi multi:
                     default:
-
                         itemData = ref loader.StaticData[graphic];
+
+                        if (itemData.IsInternal)
+                        {
+                            continue;
+                        }
 
                         if (itemData.IsFoliage && !itemData.IsMultiMovable && World.Season >= Season.Winter && !(obj is Multi))
                         {
@@ -444,73 +439,59 @@ namespace ClassicUO.Game.Scenes
                             continue;
                         }
 
-                        break;
-                }
-
-                if (!ismobile && !iscorpse && !island && itemData.IsInternal)
-                {
-                    continue;
-                }
-
-                sbyte z = obj.Z;
-
-                if (!island)
-                {
-                    if (!iscorpse && !ismobile && itemData.IsFoliage)
-                    {
-                        if (obj.FoliageIndex != FoliageIndex)
+                        if (itemData.IsFoliage)
                         {
-                            sbyte index = 0;
-
-                            bool check = World.Player.X <= worldX && World.Player.Y <= worldY;
-
-                            if (!check)
+                            if (obj.FoliageIndex != FoliageIndex)
                             {
-                                check = World.Player.Y <= worldY && World.Player.X <= worldX + 1;
+                                sbyte index = 0;
+
+                                bool check = World.Player.X <= worldX && World.Player.Y <= worldY;
 
                                 if (!check)
                                 {
-                                    check = World.Player.X <= worldX && World.Player.Y <= worldY + 1;
-                                }
-                            }
+                                    check = World.Player.Y <= worldY && World.Player.X <= worldX + 1;
 
-                            if (check)
-                            {
-                                ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
-
-                                if (texture != null)
-                                {
-                                    _rectangleObj.X = obj.RealScreenPosition.X - (texture.Width >> 1) + texture.ImageRectangle.X;
-                                    _rectangleObj.Y = obj.RealScreenPosition.Y - texture.Height + texture.ImageRectangle.Y;
-                                    _rectangleObj.Width = texture.ImageRectangle.Width;
-                                    _rectangleObj.Height = texture.ImageRectangle.Height;
-
-                                    check = Exstentions.InRect(ref _rectangleObj, ref _rectanglePlayer);
-
-                                    if (check)
+                                    if (!check)
                                     {
-                                        index = FoliageIndex;
-                                        IsFoliageUnion(obj.Graphic, obj.X, obj.Y, z);
+                                        check = World.Player.X <= worldX && World.Player.Y <= worldY + 1;
                                     }
                                 }
+
+                                if (check)
+                                {
+                                    ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
+
+                                    if (texture != null)
+                                    {
+                                        _rectangleObj.X = obj.RealScreenPosition.X - (texture.Width >> 1) + texture.ImageRectangle.X;
+                                        _rectangleObj.Y = obj.RealScreenPosition.Y - texture.Height + texture.ImageRectangle.Y;
+                                        _rectangleObj.Width = texture.ImageRectangle.Width;
+                                        _rectangleObj.Height = texture.ImageRectangle.Height;
+
+                                        check = Exstentions.InRect(ref _rectangleObj, ref _rectanglePlayer);
+
+                                        if (check)
+                                        {
+                                            index = FoliageIndex;
+                                            IsFoliageUnion(obj.Graphic, obj.X, obj.Y, obj.Z);
+                                        }
+                                    }
+                                }
+
+                                obj.FoliageIndex = index;
                             }
 
-                            obj.FoliageIndex = index;
+                            if (_foliageCount >= _foliages.Length)
+                            {
+                                int newsize = _foliages.Length + 50;
+                                Array.Resize(ref _foliages, newsize);
+                            }
+
+                            _foliages[_foliageCount++] = obj;
                         }
 
-                        if (_foliageCount >= _foliages.Length)
-                        {
-                            int newsize = _foliages.Length + 50;
-                            Array.Resize(ref _foliages, newsize);
-                        }
-
-                        _foliages[_foliageCount++] = obj;
-
-                        goto FOLIAGE_SKIP;
-                    }
+                        break;
                 }
-                
-                FOLIAGE_SKIP:
 
                 if (_renderListCount >= _renderList.Length)
                 {
