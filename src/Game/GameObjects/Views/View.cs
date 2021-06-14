@@ -63,9 +63,17 @@ namespace ClassicUO.Game.GameObjects
                 return state;
             }
         );
-        public bool UseObjectHandles { get; set; }
-        public bool ClosedObjectHandles { get; set; }
-        public bool ObjectHandlesOpened { get; set; }
+
+        public enum ObjectHandleState
+        {
+            NONE,
+            NAME_NEEDED,
+            DISPLAYING,
+            CLOSING
+        };
+
+        public ObjectHandleState ObjectHandle { get; set; }
+
         public byte AlphaHue { get; set; }
         public bool AllowedToDraw { get; set; } = true;
 

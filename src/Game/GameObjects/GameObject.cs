@@ -367,7 +367,7 @@ namespace ClassicUO.Game.GameObjects
             _screenPosition = Point.Zero;
             IsFlipped = false;
             Graphic = 0;
-            UseObjectHandles = ClosedObjectHandles = ObjectHandlesOpened = false;
+            ObjectHandle = ObjectHandleState.NONE;
             FrameInfo = Rectangle.Empty;
         }
     }

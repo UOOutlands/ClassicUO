@@ -49,7 +49,6 @@ namespace ClassicUO.Game.Scenes
     {
         private static GameObject[] _renderList = new GameObject[10000];
         private static GameObject[] _foliages = new GameObject[100];
-        private static readonly GameObject[] _objectHandles = new GameObject[Constants.MAX_OBJECT_HANDLES];
         private static readonly TreeUnion[] _treeInfos =
         {
             new TreeUnion(0x0D45, 0x0D4C),
@@ -69,7 +68,6 @@ namespace ClassicUO.Game.Scenes
         private int _maxZ;
         private Vector2 _minPixel, _maxPixel;
         private bool _noDrawRoofs;
-        private int _objectHandlesCount;
         private Point _offset, _maxTile, _minTile, _last_scaled_offset;
         private int _oldPlayerX, _oldPlayerY, _oldPlayerZ;
         private int _renderListCount, _foliageCount;
@@ -263,6 +261,31 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
+        private void UpdateObjectHandles(GameObject obj, bool useObjectHandles)
+        {
+            if (useObjectHandles && NameOverHeadManager.IsAllowed(obj as Entity))
+            {
+                switch (obj.ObjectHandle)
+                {
+                    case GameObject.ObjectHandleState.NONE:
+                    case GameObject.ObjectHandleState.CLOSING:
+                        obj.ObjectHandle = GameObject.ObjectHandleState.NAME_NEEDED;
+                        break;
+                    case GameObject.ObjectHandleState.NAME_NEEDED:
+                        break;
+                    case GameObject.ObjectHandleState.DISPLAYING:
+                        obj.UpdateTextCoordsV();
+                        break;
+                }
+            }
+            else if (obj.ObjectHandle != GameObject.ObjectHandleState.NONE &&
+                     obj.ObjectHandle != GameObject.ObjectHandleState.CLOSING)
+            {
+                obj.ObjectHandle = GameObject.ObjectHandleState.CLOSING;
+                obj.UpdateTextCoordsV();
+            }
+        }
+
         private void AddTileToRenderList(GameObject obj, int worldX, int worldY, bool useObjectHandles, int maxZ, GameObject parent = null)
         {
             TileDataLoader loader = TileDataLoader.Instance;
@@ -303,22 +326,31 @@ namespace ClassicUO.Game.Scenes
                     case Mobile _:
                         maxObjectZ += Constants.DEFAULT_CHARACTER_HEIGHT;
                         ismobile = true;
+                        UpdateObjectHandles(obj, useObjectHandles);
                         break;
 
                     case Land _:
                         island = true;
-                        goto SKIP_HANDLES_CHECK;
+                        break;
 
                     case Item it:
-
                         if (it.IsCorpse)
                         {
                             iscorpse = true;
+                            UpdateObjectHandles(obj, useObjectHandles);
                             goto default;
                         }
-                        else if (it.IsMulti)
+
+                        if (it.IsMulti)
                         {
                             graphic = it.MultiGraphic;
+                        }
+
+                        itemData = ref loader.StaticData[graphic];
+
+                        if (!it.IsLocked || (it.IsLocked && itemData.IsContainer))
+                        {
+                            UpdateObjectHandles(obj, useObjectHandles);
                         }
                         goto default;
 
@@ -379,40 +411,6 @@ namespace ClassicUO.Game.Scenes
 
                         break;
                 }
-
-
-                if (useObjectHandles && NameOverHeadManager.IsAllowed(obj as Entity))
-                {
-                    if ((ismobile || iscorpse || obj is Item it && (!it.IsLocked || it.IsLocked && itemData.IsContainer) && !it.IsMulti) && !obj.ClosedObjectHandles)
-                    {
-                        int index = _objectHandlesCount % Constants.MAX_OBJECT_HANDLES;
-
-                        if (_objectHandles[index] != null && !_objectHandles[index].ObjectHandlesOpened)
-                        {
-                            _objectHandles[index].UseObjectHandles = false;
-                        }
-
-                        _objectHandles[index] = obj;
-                        obj.UseObjectHandles = true;
-                        _objectHandlesCount++;
-                        obj.UpdateTextCoordsV();
-                    }
-                }
-                else if (obj.ClosedObjectHandles)
-                {
-                    obj.ClosedObjectHandles = false;
-                    obj.ObjectHandlesOpened = false;
-                    obj.UpdateTextCoordsV();
-                }
-                else if (obj.UseObjectHandles)
-                {
-                    obj.ObjectHandlesOpened = false;
-                    obj.UseObjectHandles = false;
-                    obj.UpdateTextCoordsV();
-                }
-
-
-                SKIP_HANDLES_CHECK:
 
                 if (maxObjectZ > maxZ)
                 {
