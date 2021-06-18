@@ -31,6 +31,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -345,6 +346,21 @@ namespace ClassicUO.Game.Scenes
             return true;
         }
 
+        private void CalculateBoundingBox(GameObject obj, ushort graphic, byte height)
+        {
+            ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
+
+            int halfWidth = ((texture.Width / 2) - 22) / 44;
+
+            obj.MinX = obj.X - halfWidth;
+            obj.MinY = obj.Y - halfWidth;
+            obj.MinZ = obj.Z;
+
+            obj.MaxX = obj.X + halfWidth;
+            obj.MaxY = obj.Y + halfWidth;
+            obj.MaxZ = (sbyte)(obj.Z + height);
+        }
+
         private void AddTileToRenderList(GameObject obj, int worldX, int worldY, bool useObjectHandles)
         {
             TileDataLoader loader = TileDataLoader.Instance;
@@ -377,6 +393,8 @@ namespace ClassicUO.Game.Scenes
                         {
                             continue;
                         }
+
+                        CalculateBoundingBox(obj, graphic, Constants.DEFAULT_CHARACTER_HEIGHT);
 
                         if (_alphaChanged && obj.AlphaHue != 0xFF)
                         {
@@ -422,6 +440,8 @@ namespace ClassicUO.Game.Scenes
                             continue;
                         }
 
+                        CalculateBoundingBox(obj, graphic, itemData.Height);
+
                         break;
 
                     default:
@@ -442,19 +462,102 @@ namespace ClassicUO.Game.Scenes
                             continue;
                         }
 
+                        CalculateBoundingBox(obj, graphic, itemData.Height);
+
                         break;
                 }
 
-                if (_renderListCount >= _renderList.Length)
+                if (GameObject.SomePositionChanged)
                 {
-                    int newsize = _renderList.Length + 1000;
-                    Array.Resize(ref _renderList, newsize);
-                }
+                    if (_renderListCount >= _renderList.Length)
+                    {
+                        int newsize = _renderList.Length + 1000;
+                        Array.Resize(ref _renderList, newsize);
+                    }
 
-                _renderList[_renderListCount++] = obj;
+                    _renderList[_renderListCount++] = obj;
+                }
             }
 
             return;
+        }
+
+        private int _sortDepth;
+
+        public class DrawDepthComparer : IComparer<GameObject>
+        {
+            public int Compare(GameObject x, GameObject y)
+            {
+                return x.DrawDepth - y.DrawDepth;
+            }
+        }
+
+        private void TopologicalVisit(GameObject obj)
+        {
+            if (obj.Visited)
+            {
+                return;
+            }
+
+            obj.Visited = true;
+
+            for (int i = 0; i < obj.BehindCount; i++)
+            {
+                if (obj.Behind[i] == null)
+                {
+                    break;
+                }
+
+                TopologicalVisit(obj.Behind[i]);
+                obj.Behind[i] = null;
+            }
+
+            obj.DrawDepth = _sortDepth++;
+        }
+
+        private void TopologicalSort()
+        {
+            GameObject a, b;
+
+            DrawDepthComparer comparer = new DrawDepthComparer();
+
+            // TODO: We absolutely should not be doing this before every frame. This should be done
+            // each time a mobile is created or moves instead.
+            for (int i = 0; i < _renderListCount; i++)
+            {
+                a = _renderList[i];
+                a.BehindCount = 0;
+                a.Visited = false;
+
+                for (int j = 0; j < _renderListCount; j++)
+                {
+                    if (i == j)
+                    {
+                        continue;
+                    }
+
+                    b = _renderList[j];
+
+                    if (b.MinX < a.MaxX && b.MinY < a.MaxY && b.MinZ < a.MaxZ)
+                    {
+                        if (a.BehindCount >= a.Behind.Length)
+                        {
+                            int newsize = a.Behind.Length * 2;
+                            Array.Resize(ref a.Behind, newsize);
+                        }
+
+                        a.Behind[a.BehindCount++] = b;
+                    }
+                }
+            }
+
+            _sortDepth = 0;
+            for (int i = 0; i < _renderListCount; i++)
+            {
+                TopologicalVisit(_renderList[i]);
+            }
+
+            Array.Sort(_renderList, 0, _renderListCount, comparer);
         }
 
         private void GetViewPort()

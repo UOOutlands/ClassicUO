@@ -507,8 +507,6 @@ namespace ClassicUO.Game.Scenes
                 return;
             }
 
-            _renderListCount = 0;
-
             _isListReady = false;
             _alphaChanged = _alphaTimer < Time.Ticks;
 
@@ -546,6 +544,11 @@ namespace ClassicUO.Game.Scenes
             int maxY = _maxTile.Y;
             Map.Map map = World.Map;
             bool use_handles = _useObjectHandles;
+
+            if (GameObject.SomePositionChanged)
+            {
+                _renderListCount = 0;
+            }
 
             // Iterate through the visible map in a diamond from top to bottom.
             // First, do the top half of the diamond
@@ -589,6 +592,13 @@ namespace ClassicUO.Game.Scenes
                     y--;
                 }
             }
+
+            if (GameObject.SomePositionChanged)
+            {
+                TopologicalSort();
+            }
+
+            GameObject.SomePositionChanged = false;
 
             UpdateTextServerEntities(World.Mobiles.Values, true);
             UpdateTextServerEntities(World.Items.Values, false);

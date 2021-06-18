@@ -51,6 +51,8 @@ namespace ClassicUO.Game.GameObjects
     {
         private Point _screenPosition;
 
+        public static bool SomePositionChanged;
+
         public bool IsDestroyed { get; protected set; }
         public bool IsPositionChanged { get; protected set; }
         public TextContainer TextContainer { get; private set; }
@@ -100,11 +102,26 @@ namespace ClassicUO.Game.GameObjects
         public ushort X, Y;
         public sbyte Z;
 
+        #region rendering
+        public int MinX, MinY;
+        public sbyte MinZ;
+        public int MaxX, MaxY;
+        public sbyte MaxZ;
+        // TODO: There must be a better way???
+        public GameObject[] Behind = new GameObject[20];
+        public int BehindCount;
+        public bool Visited;
+        public int DrawDepth;
+        #endregion
+
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AddToTile(int x, int y)
         {
             if (World.Map != null)
             {
+                SomePositionChanged = true;
+
                 RemoveFromTile();
 
                 if (!IsDestroyed)
@@ -124,6 +141,8 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RemoveFromTile()
         {
+            SomePositionChanged = true;
+
             if (TPrevious != null)
             {
                 TPrevious.TNext = TNext;
