@@ -68,8 +68,8 @@ namespace ClassicUO.Game.GameObjects
             FrameInfo.Height = 0;
 
             posY -= 3;
-            int drawX = posX + (int) Offset.X;
-            int drawY = posY + (int) (Offset.Y - Offset.Z);
+            int drawX = posX + (int)Offset.X;
+            int drawY = posY + (int)(Offset.Y - Offset.Z);
 
             drawX += 22;
             drawY += 22;
@@ -124,21 +124,28 @@ namespace ClassicUO.Game.GameObjects
                         _viewHue = 0x0386;
                     }
                 }
-                else if (ProfileManager.CurrentProfile.HighlightMobilesByFlags)
+                else
                 {
-                    if (IsPoisoned)
+                    if (ProfileManager.CurrentProfile.HighlightMobilesByPoisoned)
                     {
-                        _viewHue = ProfileManager.CurrentProfile.PoisonHue;
+                        if (IsPoisoned)
+                        {
+                            _viewHue = ProfileManager.CurrentProfile.PoisonHue;
+                        }
                     }
-
-                    if (IsParalyzed)
+                    if (ProfileManager.CurrentProfile.HighlightMobilesByParalize)
                     {
-                        _viewHue = ProfileManager.CurrentProfile.ParalyzedHue;
+                        if (IsParalyzed)
+                        {
+                            _viewHue = ProfileManager.CurrentProfile.ParalyzedHue;
+                        }
                     }
-
-                    if (NotorietyFlag != NotorietyFlag.Invulnerable && IsYellowHits)
+                    if (ProfileManager.CurrentProfile.HighlightMobilesByInvul)
                     {
-                        _viewHue = ProfileManager.CurrentProfile.InvulnerableHue;
+                        if (NotorietyFlag != NotorietyFlag.Invulnerable && IsYellowHits)
+                        {
+                            _viewHue = ProfileManager.CurrentProfile.InvulnerableHue;
+                        }
                     }
                 }
             }
@@ -243,7 +250,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (TryGetSittingInfo(out seatData))
                 {
-                    animGroup = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND;
+                    animGroup = (byte)PEOPLE_ANIMATION_GROUP.PAG_STAND;
                     animIndex = 0;
 
                     ProcessSteps(out dir);
@@ -403,7 +410,7 @@ namespace ClassicUO.Game.GameObjects
                                         break;
 
 
-                                    // gargoyle mysticism book seems ok. Mha!
+                                        // gargoyle mysticism book seems ok. Mha!
                                 }
                             }
 
@@ -425,7 +432,7 @@ namespace ClassicUO.Game.GameObjects
                                 drawX,
                                 drawY,
                                 ref hueVec,
-                                IsFlipped, 
+                                IsFlipped,
                                 animIndex,
                                 false,
                                 graphic,
@@ -565,7 +572,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (fc > 0 && frameIndex >= fc)
             {
-                frameIndex = (sbyte) (fc - 1);
+                frameIndex = (sbyte)(fc - 1);
             }
             else if (frameIndex < 0)
             {
@@ -599,7 +606,7 @@ namespace ClassicUO.Game.GameObjects
 
                 y -= frame.Height + frame.CenterY;
 
-                SKIP:
+            SKIP:
 
                 if (hasShadow)
                 {
@@ -657,9 +664,9 @@ namespace ClassicUO.Game.GameObjects
                             int frameHeight = frame?.Height ?? 61;
                             _characterFrameStartY = y - (frame != null ? 0 : frameHeight - SIT_OFFSET_Y);
                             _characterFrameHeight = frameHeight;
-                            _startCharacterWaistY = (int) (frameHeight * UPPER_BODY_RATIO) + _characterFrameStartY;
-                            _startCharacterKneesY = (int) (frameHeight * MID_BODY_RATIO) + _characterFrameStartY;
-                            _startCharacterFeetY = (int) (frameHeight * LOWER_BODY_RATIO) + _characterFrameStartY;
+                            _startCharacterWaistY = (int)(frameHeight * UPPER_BODY_RATIO) + _characterFrameStartY;
+                            _startCharacterKneesY = (int)(frameHeight * MID_BODY_RATIO) + _characterFrameStartY;
+                            _startCharacterFeetY = (int)(frameHeight * LOWER_BODY_RATIO) + _characterFrameStartY;
 
                             if (frame == null)
                             {
@@ -948,10 +955,10 @@ namespace ClassicUO.Game.GameObjects
 
                     break;
 
-                /*case Layer.Skirt:
-                    skirt = mobile.FindItemByLayer( Layer.Skirt];
+                    /*case Layer.Skirt:
+                        skirt = mobile.FindItemByLayer( Layer.Skirt];
 
-                    break;*/
+                        break;*/
             }
 
             return false;
