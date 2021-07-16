@@ -50,6 +50,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class CounterBarGump : Gump
     {
+        private const int MAX_COUNTER_SIZE = 60;
         private AlphaBlendControl _background;
 
         private int _rows, _columns, _rectSize;
@@ -128,14 +129,14 @@ namespace ClassicUO.Game.UI.Gumps
             //    ok = true;
             //}
 
-            if (rows > 30)
+            if (rows > MAX_COUNTER_SIZE)
             {
-                rows = 30;
+                rows = MAX_COUNTER_SIZE;
             }
 
-            if (columns > 30)
+            if (columns > MAX_COUNTER_SIZE)
             {
-                columns = 30;
+                columns = MAX_COUNTER_SIZE;
             }
 
             if (size < 30)

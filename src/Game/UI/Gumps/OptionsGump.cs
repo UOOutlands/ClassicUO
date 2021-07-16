@@ -2940,7 +2940,7 @@ namespace ClassicUO.Game.UI.Gumps
                 50,
                 false,
                 true,
-                30
+                60
             );
 
             _rows.SetText(_currentProfile.CounterBarRows.ToString());
@@ -2959,7 +2959,7 @@ namespace ClassicUO.Game.UI.Gumps
                 50,
                 false,
                 true,
-                30
+                60
             );
 
             _columns.SetText(_currentProfile.CounterBarColumns.ToString());
