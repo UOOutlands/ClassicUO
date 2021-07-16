@@ -350,6 +350,20 @@ namespace ClassicUO.Game.UI.Gumps
                 ) { ButtonParameter = 12 }
             );
 
+            Add
+            (
+                new NiceButton
+                    (
+                        10,
+                        10 + 30 * i++,
+                        140,
+                        25,
+                        ButtonAction.Activate,
+                        ResGumps.IgnoreListManager
+                    )
+                    { ButtonParameter = (int)Buttons.OpenIgnoreList }
+            );
+
 
             Add
             (
@@ -3405,7 +3419,6 @@ namespace ClassicUO.Game.UI.Gumps
             Add(rightArea, PAGE);
         }
 
-
         public override void OnButtonClick(int buttonID)
         {
             if (buttonID == (int) Buttons.Last + 1)
@@ -3441,7 +3454,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case Buttons.NewMacro: break;
 
-                case Buttons.DeleteMacro: break;
+                case Buttons.DeleteMacro:
+                    break;
+                case Buttons.OpenIgnoreList:
+                    // If other IgnoreManagerGump exist - Dispose it
+                    UIManager.GetGump<IgnoreManagerGump>()?.Dispose();
+                    // Open new
+                    UIManager.Add(new IgnoreManagerGump());
+                    break;
             }
         }
 
@@ -4444,10 +4464,11 @@ namespace ClassicUO.Game.UI.Gumps
             EnemyColor,
             MurdererColor,
 
+            OpenIgnoreList,
             NewMacro,
             DeleteMacro,
 
-            Last = DeleteMacro
+            Last = DeleteMacro,
         }
 
 

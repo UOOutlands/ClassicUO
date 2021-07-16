@@ -41,6 +41,11 @@ namespace ClassicUO.Configuration
         public static Profile CurrentProfile { get; private set; }
         public static string ProfilePath { get; private set; }
 
+        /// <summary>
+        /// Hold path to all characters on acc in specific (Outlands Path)
+        /// </summary>
+        public static string ServerPath { get; private set; }
+
         public static void Load(string servername, string username, string charactername)
         {
             string rootpath;
@@ -57,6 +62,7 @@ namespace ClassicUO.Configuration
             string path = FileSystemHelper.CreateFolderIfNotExists(rootpath, username, servername, charactername);
             string fileToLoad = Path.Combine(path, "profile.json");
 
+            ServerPath = FileSystemHelper.CreateFolderIfNotExists(rootpath, username, servername);
             ProfilePath = path;
             CurrentProfile = ConfigurationResolver.Load<Profile>(fileToLoad) ?? new Profile();
 
